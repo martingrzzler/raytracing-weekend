@@ -12,8 +12,8 @@ impl Vec3 {
 		Self { e: (0.0, 0.0, 0.0) }
 	}
 
-	pub fn from(arr: (f64, f64, f64)) -> Self {
-		Self { e: arr }
+	pub fn from(x: f64, y: f64, z: f64) -> Self {
+		Self { e: (x, y, z) }
 	}
 
 	pub fn x(&self) -> f64 {
@@ -87,25 +87,25 @@ mod test {
 
 	#[test]
 	fn test_add_two_vec3() {
-		let res = Vec3::from((1.0, 2.0, 3.0)) + Vec3::from((3.0, 2.0, 1.0));
-		assert_eq!(res, Vec3::from((4.0, 4.0, 4.0)));
+		let res = Vec3::from(1.0, 2.0, 3.0) + Vec3::from(3.0, 2.0, 1.0);
+		assert_eq!(res, Vec3::from(4.0, 4.0, 4.0));
 	}
 
 	#[test]
 	fn test_add_assign() {
 		let mut v = Vec3::new();
-		v += Vec3::from((1.0, 2.0, 3.0));
-		assert_eq!(v, Vec3::from((1.0, 2.0, 3.0)));
+		v += Vec3::from(1.0, 2.0, 3.0);
+		assert_eq!(v, Vec3::from(1.0, 2.0, 3.0));
 	}
 	#[test]
 	fn test_neg() {
-		let v = -Vec3::from((1.0, 2.0, 3.0));
-		assert_eq!(v, Vec3::from((-1.0, -2.0, -3.0)))
+		let v = -Vec3::from(1.0, 2.0, 3.0);
+		assert_eq!(v, Vec3::from(-1.0, -2.0, -3.0))
 	}
 
 	#[test]
 	fn test_index() {
-		let v = Vec3::from((1.0, 2.0, 3.0));
+		let v = Vec3::from(1.0, 2.0, 3.0);
 		assert_eq!(v[0], 1.0);
 		assert_eq!(v[1], 2.0);
 		assert_eq!(v[2], 3.0);
@@ -114,13 +114,13 @@ mod test {
 	#[test]
 	#[should_panic]
 	fn test_index_out_of_bounds() {
-		let v = Vec3::from((1.0, 2.0, 3.0));
+		let v = Vec3::from(1.0, 2.0, 3.0);
 		let _ = v[4];
 	}
 
 	#[test]
 	fn test_index_mut() {
-		let mut v = Vec3::from((1.0, 2.0, 3.0));
+		let mut v = Vec3::from(1.0, 2.0, 3.0);
 		v[0] = 3.3;
 		assert_eq!(v[0], 3.3);
 	}
