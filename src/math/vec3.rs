@@ -1,18 +1,34 @@
+#![allow(dead_code)]
 use core::panic;
-use std::ops;
+use std::ops::{self};
 
 #[derive(Debug, PartialEq)]
 pub struct Vec3 {
 	e: (f64, f64, f64),
 }
 
-#[allow(dead_code)]
+pub fn dot(a: &Vec3, b: &Vec3) -> f64 {
+	a.e.0 * b.e.0 + a.e.1 * b.e.1 + a.e.2 * b.e.2
+}
+
+pub fn cross(a: &Vec3, b: &Vec3) -> Vec3 {
+	Vec3 {
+		e: (
+			a.e.1 * b.e.2 - a.e.2 * b.e.1,
+			a.e.2 * b.e.0 - a.e.0 * b.e.2,
+			a.e.0 * b.e.1 - a.e.1 * b.e.0,
+		),
+	}
+}
+
+pub fn norm(v: &Vec3) -> Vec3 {
+	v / v.len()
+}
+
 pub type Point3 = Vec3;
 
-#[allow(dead_code)]
 pub type Color = Vec3;
 
-#[allow(dead_code)]
 impl Vec3 {
 	pub fn new() -> Self {
 		Self { e: (0.0, 0.0, 0.0) }
@@ -61,12 +77,29 @@ impl ops::AddAssign for Vec3 {
 	}
 }
 
-impl ops::Add for Vec3 {
+impl ops::Add for &Vec3 {
 	type Output = Vec3;
 
-	fn add(self, rhs: Vec3) -> Vec3 {
-		Self {
+	fn add(self, rhs: &Vec3) -> Vec3 {
+		Vec3 {
 			e: (self.e.0 + rhs.e.0, self.e.1 + rhs.e.1, self.e.2 + rhs.e.2),
+		}
+	}
+}
+
+impl ops::SubAssign for Vec3 {
+	fn sub_assign(&mut self, rhs: Vec3) {
+		*self = Self {
+			e: (self.e.0 - rhs.e.0, self.e.1 - rhs.e.1, self.e.2 - rhs.e.2),
+		}
+	}
+}
+
+impl ops::Sub for Vec3 {
+	type Output = Vec3;
+	fn sub(self, rhs: Self) -> Self::Output {
+		Self {
+			e: (self.e.0 - rhs.e.0, self.e.1 - rhs.e.1, self.e.2 - rhs.e.2),
 		}
 	}
 }
@@ -131,13 +164,32 @@ impl ops::DivAssign for Vec3 {
 	}
 }
 
+impl ops::Div<f64> for &Vec3 {
+	type Output = Vec3;
+	fn div(self, rhs: f64) -> Self::Output {
+		Vec3 {
+			e: (self.e.0 / rhs, self.e.1 / rhs, self.e.2 / rhs),
+		}
+	}
+}
+
+impl ops::Mul<f64> for &Vec3 {
+	type Output = Vec3;
+
+	fn mul(self, rhs: f64) -> Self::Output {
+		Vec3 {
+			e: (self.e.0 * rhs, self.e.1 * rhs, self.e.2 * rhs),
+		}
+	}
+}
+
 #[cfg(test)]
 mod test {
 	use super::*;
 
 	#[test]
 	fn test_add_two_vec3() {
-		let res = Vec3::from(1.0, 2.0, 3.0) + Vec3::from(3.0, 2.0, 1.0);
+		let res = &Vec3::from(1.0, 2.0, 3.0) + &Vec3::from(3.0, 2.0, 1.0);
 		assert_eq!(res, Vec3::from(4.0, 4.0, 4.0));
 	}
 
@@ -211,5 +263,54 @@ mod test {
 	fn test_len() {
 		let v = Vec3::from(3.0, 4.0, 0.0);
 		assert_eq!(v.len(), 5.0);
+	}
+
+	#[test]
+	fn test_sub() {
+		let res = Vec3::from(1.0, -10.0, 5.0) - Vec3::from(3.0, -20.0, 3.0);
+		assert_eq!(res, Vec3::from(-2.0, 10.0, 2.0));
+	}
+
+	#[test]
+	fn test_sub_assign() {
+		let mut v = Vec3::from(1.0, -4.5, 3.2);
+		v -= Vec3::from(1.0, 1.0, 1.0);
+		assert_eq!(v, Vec3::from(0.0, -5.5, 2.2));
+	}
+
+	#[test]
+	fn test_dot() {
+		let a = Vec3::from(1.0, 2.0, 3.0);
+		let b = Vec3::from(-2.0, 4.0, 5.0);
+		let dot_product = dot(&a, &b);
+		assert_eq!(dot_product, 21.0);
+	}
+
+	#[test]
+	fn test_cross() {
+		let a = Vec3::from(1.0, 2.0, 3.0);
+		let b = Vec3::from(-2.0, 4.0, 5.0);
+		let cross_vec = cross(&a, &b);
+		assert_eq!(cross_vec, Vec3::from(-2.0, -11.0, 8.0));
+	}
+
+	#[test]
+	fn test_norm() {
+		let v = Vec3::from(-2.0, 4.0, 5.0);
+		let unit_vec = norm(&v);
+		assert_eq!(unit_vec, &v / (45.0 as f64).sqrt());
+		assert_eq!(unit_vec.len(), 1.0);
+	}
+
+	#[test]
+	fn test_div_by_scaler() {
+		let v = &Vec3::from(-2.0, 4.0, 5.0) / 2.0;
+		assert_eq!(v, Vec3::from(-1.0, 2.0, 2.5));
+	}
+
+	#[test]
+	fn test_mul_with_scaler() {
+		let v = &Vec3::from(-2.0, 4.0, 5.0) * (1.0 / 2.0);
+		assert_eq!(v, Vec3::from(-1.0, 2.0, 2.5));
 	}
 }
