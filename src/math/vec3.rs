@@ -2,7 +2,7 @@
 use core::panic;
 use std::ops::{self};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
 	e: (f64, f64, f64),
 }
@@ -95,10 +95,10 @@ impl ops::SubAssign for Vec3 {
 	}
 }
 
-impl ops::Sub for Vec3 {
+impl ops::Sub for &Vec3 {
 	type Output = Vec3;
-	fn sub(self, rhs: Self) -> Self::Output {
-		Self {
+	fn sub(self, rhs: &Vec3) -> Self::Output {
+		Vec3 {
 			e: (self.e.0 - rhs.e.0, self.e.1 - rhs.e.1, self.e.2 - rhs.e.2),
 		}
 	}
@@ -267,7 +267,7 @@ mod test {
 
 	#[test]
 	fn test_sub() {
-		let res = Vec3::from(1.0, -10.0, 5.0) - Vec3::from(3.0, -20.0, 3.0);
+		let res = &Vec3::from(1.0, -10.0, 5.0) - &Vec3::from(3.0, -20.0, 3.0);
 		assert_eq!(res, Vec3::from(-2.0, 10.0, 2.0));
 	}
 
