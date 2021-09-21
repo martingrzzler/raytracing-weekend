@@ -37,10 +37,20 @@ impl Ray {
 #[cfg(test)]
 mod test {
 	use super::*;
+	use crate::math::vec3::dot;
 
 	#[test]
 	fn test_scaled_ray() {
 		let ray = Ray::from(&Point3::from(0.0, 0.0, 0.0), &Vec3::from(1.0, 1.0, 1.0));
 		assert_eq!(ray.at(3.0), Point3::from(3.0, 3.0, 3.0))
+	}
+
+	#[test]
+	fn dot_with_itself_is_len_sq() {
+		let ray = Ray::from(&Point3::from(0.0, 0.0, 0.0), &Vec3::from(1.0, 1.0, 1.0));
+		assert_eq!(
+			dot(ray.direction(), ray.direction()),
+			ray.direction().len_squared()
+		)
 	}
 }
