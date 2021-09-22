@@ -47,19 +47,26 @@ pub fn run() {
 }
 
 fn ray_color(r: &Ray) -> Color {
-	if hit_sphere(&Point3::from(0.0, 0.0, -5.0), 1.5, r) {
-		return Color::from(1.0, 0.0, 0.0);
+	let sphere_center = Point3::from(0.0, 0.0, -1.0);
+	let t = hit_sphere(&sphere_center, 0.5, r);
+	if t > 0.0 {
+		let normal = norm(&(sphere_center - r.at(t)));
+		return 0.5 * Color::from(normal.x() + 1.0, normal.y() + 1.0, normal.z() + 1.0);
 	}
 	let unit_dir = norm(r.direction());
 	let t = 0.5 * (unit_dir.y() + 1.0);
 	Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t
 }
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
 	let oc = r.origin() - center;
 	let a = r.direction().len_squared();
-	let b = 2.0 * dot(&oc, r.direction());
-	let c = &oc.len_squared() - radius * radius;
-	let discriminant = b * b - 4.0 * a * c;
-	return discriminant > 0.0;
+	let b_half = dot(&oc, r.direction());
+	let c = oc.len_squared() - radius * radius;
+	let discriminant = b_half * b_half - a * c;
+	if discriminant < 0.0 {
+		-1.0
+	} else {
+		(-b_half - discriminant.sqrt()) / a
+	}
 }
