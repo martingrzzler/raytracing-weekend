@@ -1,6 +1,7 @@
 use std::io::{self, Write};
 
-use math::{dot, norm, Ray, Vec3};
+use math::{dot, norm, Vec3};
+use rendering::Ray;
 
 use crate::{
 	color::write_color,
@@ -9,6 +10,7 @@ use crate::{
 
 mod color;
 mod math;
+mod rendering;
 
 pub fn run() {
 	let aspect_ratio = 16.0 / 9.0;
@@ -30,7 +32,7 @@ pub fn run() {
 	for j in 0..image_height {
 		eprint!(
 			"\rProgress: {}%",
-			((((j as f64) + 1.0) / (image_height as f64)) * 100.0) as i32
+			(((j as f64) + 1.0) / (image_height as f64) * 100.0) as i32
 		);
 		io::stderr().flush().unwrap();
 		for i in 0..image_width {
