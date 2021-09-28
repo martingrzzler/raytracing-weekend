@@ -45,9 +45,10 @@ impl Hit for Sphere {
 			}
 		}
 		let mut rec = HitRecord::new();
-		rec.t = root;
-		rec.p = r.at(rec.t);
-		rec.normal = (rec.p - &self.center) / self.radius;
+		*rec.t_mut() = root;
+		*rec.point_mut() = r.at(rec.t());
+		let outward_normal = (rec.point() - &self.center) / self.radius;
+		rec.calc_normal(&r, outward_normal);
 		Some(rec)
 	}
 }
