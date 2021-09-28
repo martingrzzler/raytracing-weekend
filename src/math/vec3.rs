@@ -27,8 +27,6 @@ pub fn norm(v: &Vec3) -> Vec3 {
 
 pub type Point3 = Vec3;
 
-pub type Color = Vec3;
-
 impl Vec3 {
 	pub fn new() -> Self {
 		Self { e: (0.0, 0.0, 0.0) }

@@ -1,4 +1,6 @@
-use crate::math::Color;
+use crate::math::Vec3;
+
+pub type Color = Vec3;
 
 pub fn write_color(color: Color) {
 	println!(

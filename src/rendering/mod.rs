@@ -2,7 +2,8 @@ pub use entity::hit::*;
 pub use entity::sphere::*;
 pub use ray::Ray;
 
-use crate::math::{norm, Color, INFINITY};
+use crate::color::Color;
+use crate::math::{norm, INFINITY};
 
 mod entity;
 pub mod ray;
