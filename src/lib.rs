@@ -20,7 +20,7 @@ pub fn run() {
 	let mut entities: Vec<Box<dyn Hit>> = vec![];
 	entities.push(Box::new(Sphere::from(Point3::from(0.0, 0.0, -1.0), 0.5)));
 	entities.push(Box::new(Sphere::from(
-		Point3::from(0.0, -20.5, -1.0),
+		Point3::from(0.0, -100.5, -1.0),
 		100.0,
 	)));
 
