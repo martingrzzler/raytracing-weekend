@@ -1,11 +1,15 @@
 use std::io::{self, Write};
 
-use color::write_color;
-use math::Vec3;
-use rendering::{ray_color, Ray, Sphere};
+use color::{write_color, Color};
+use rendering::{ray_color, Sphere};
 
-use crate::{math::Point3, rendering::Hit};
+use crate::{
+	camera::Camera,
+	math::{rand, Point3},
+	rendering::Hit,
+};
 
+mod camera;
 mod color;
 mod math;
 mod rendering;
@@ -15,6 +19,7 @@ pub fn run() {
 	let aspect_ratio = 16.0 / 9.0;
 	let image_width = 400;
 	let image_height = (image_width as f64 / aspect_ratio) as i32;
+	let samples_per_pixel = 100;
 
 	// Entities
 	let mut entities: Vec<Box<dyn Hit>> = vec![];
@@ -25,16 +30,7 @@ pub fn run() {
 	)));
 
 	// Camera
-	let viewport_height = 2.0;
-	let viewport_width = aspect_ratio * viewport_height;
-	let focal_length = 1.0;
-
-	let origin = Point3::new();
-	let horizontal = Vec3::from(viewport_width, 0.0, 0.0);
-	let vertical = Vec3::from(0.0, viewport_height, 0.0);
-
-	let upper_left_corner =
-		&origin - &horizontal / 2.0 + &vertical / 2.0 - Vec3::from(0.0, 0.0, focal_length);
+	let cam = Camera::new();
 
 	// Render
 	print!("P3\n{} {}\n255\n", image_width, image_height);
@@ -45,12 +41,14 @@ pub fn run() {
 		);
 		io::stderr().flush().unwrap();
 		for i in 0..image_width {
-			let u = (i as f64) / ((image_width as f64) - 1.0);
-			let v = (j as f64) / ((image_height as f64) - 1.0);
-			let ray_dir = &upper_left_corner + &horizontal * u - &vertical * v - &origin;
-			let r = Ray::from(&origin, &ray_dir);
-			let pixel_color = ray_color(&r, &entities);
-			write_color(pixel_color);
+			let mut pixel_color = Color::new();
+			for _ in 0..samples_per_pixel {
+				let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
+				let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
+				let r = cam.calc_ray(u, v);
+				pixel_color += ray_color(&r, &entities);
+			}
+			write_color(pixel_color, samples_per_pixel);
 		}
 	}
 	eprintln!("\nDone.");

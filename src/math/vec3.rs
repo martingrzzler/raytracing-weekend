@@ -4,7 +4,7 @@ use std::ops::{self};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
-	e: (f64, f64, f64),
+	pub e: (f64, f64, f64),
 }
 
 pub fn dot(a: &Vec3, b: &Vec3) -> f64 {
