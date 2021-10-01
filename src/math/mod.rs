@@ -19,10 +19,12 @@ pub fn rand() -> f64 {
 	uniform_dst.sample(&mut rng)
 }
 
-// pub fn rand_rng(min: f64, max: f64) -> f64 {
-// 	let mut rng = rand::thread_rng();
-// 	return rng.gen_range(min..max);
-// }
+pub fn rand_rng(min: f64, max: f64) -> f64 {
+	let mut rng = rand::thread_rng();
+	let uniform_dst = Uniform::new_inclusive(min, max);
+
+	uniform_dst.sample(&mut rng)
+}
 
 #[inline]
 pub fn clamp<T: PartialOrd>(input: T, min: T, max: T) -> T {

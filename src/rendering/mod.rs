@@ -3,15 +3,21 @@ pub use entity::sphere::*;
 pub use ray::Ray;
 
 use crate::color::Color;
+use crate::math::Vec3;
 use crate::math::{norm, INFINITY};
 
 mod entity;
 pub mod ray;
 
-pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>) -> Color {
-	let opt = trace(&r, 0.0, INFINITY, entities);
+pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
+	if depth <= 0 {
+		Color::new();
+	}
+	let opt = trace(&r, 0.001, INFINITY, entities);
 	if let Some(rec) = opt {
-		return 0.5 * (Color::from(1.0, 1.0, 1.0) + rec.normal());
+		let target = rec.point() + Vec3::random_in_hemisphere(rec.normal());
+		let child_ray = Ray::from(rec.point(), &(target - rec.point()));
+		return 0.5 * ray_color(&child_ray, entities, depth - 1);
 	}
 
 	let unit_dir = norm(r.direction());

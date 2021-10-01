@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use super::{rand, rand_rng};
 use core::panic;
 use std::ops::{self};
 
@@ -34,6 +35,41 @@ impl Vec3 {
 
 	pub fn from(x: f64, y: f64, z: f64) -> Self {
 		Self { e: (x, y, z) }
+	}
+
+	pub fn from_rand() -> Self {
+		Self {
+			e: (rand(), rand(), rand()),
+		}
+	}
+
+	pub fn from_rand_rng(min: f64, max: f64) -> Self {
+		Self {
+			e: (rand_rng(min, max), rand_rng(min, max), rand_rng(min, max)),
+		}
+	}
+
+	pub fn random_in_unit_sphere() -> Self {
+		loop {
+			let p = Vec3::from_rand_rng(-1.0, 1.0);
+			if p.len_squared() >= 1.0 {
+				continue;
+			}
+			return p;
+		}
+	}
+
+	pub fn random_unit_vec() -> Self {
+		norm(&Vec3::random_in_unit_sphere())
+	}
+
+	pub fn random_in_hemisphere(normal: &Self) -> Self {
+		let res = Vec3::random_in_unit_sphere();
+		if dot(&res, normal) > 0.0 {
+			res
+		} else {
+			-res
+		}
 	}
 
 	pub fn x(&self) -> f64 {
