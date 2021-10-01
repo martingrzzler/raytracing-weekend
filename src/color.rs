@@ -9,6 +9,7 @@ pub fn write_color(color: Color, samples_per_pixel: i32) {
 
 	let scale = 1.0 / samples_per_pixel as f64;
 
+	// sqrt for gamma correction
 	r *= scale;
 	r = r.sqrt();
 	g *= scale;
