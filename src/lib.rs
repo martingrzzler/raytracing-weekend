@@ -1,4 +1,5 @@
 use std::io::{self, Write};
+use std::rc::Rc;
 
 use color::{write_color, Color};
 use rendering::{ray_color, Sphere};
@@ -6,7 +7,7 @@ use rendering::{ray_color, Sphere};
 use crate::{
 	camera::Camera,
 	math::{rand, Point3},
-	rendering::Hit,
+	rendering::{Hit, Lambertian, Metal},
 };
 
 mod camera;
@@ -22,12 +23,33 @@ pub fn run() {
 	let samples_per_pixel = 100;
 	let max_depth = 50;
 
+	// Materials
+	let ground = Rc::new(Lambertian::from(Color::from(0.8, 0.8, 0.0)));
+	let center = Rc::new(Lambertian::from(Color::from(0.7, 0.3, 0.3)));
+	let left = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8)));
+	let right = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2)));
+
 	// Entities
 	let mut entities: Vec<Box<dyn Hit>> = vec![];
-	entities.push(Box::new(Sphere::from(Point3::from(0.0, 0.0, -1.0), 0.5)));
+	entities.push(Box::new(Sphere::from(
+		Point3::from(0.0, 0.0, -1.0),
+		0.5,
+		center.clone(),
+	)));
+	entities.push(Box::new(Sphere::from(
+		Point3::from(1.0, 0.0, -1.0),
+		0.5,
+		right.clone(),
+	)));
+	entities.push(Box::new(Sphere::from(
+		Point3::from(-1.0, 0.0, -1.0),
+		0.5,
+		left.clone(),
+	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(0.0, -100.5, -1.0),
 		100.0,
+		ground.clone(),
 	)));
 
 	// Camera

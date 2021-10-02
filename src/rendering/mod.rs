@@ -1,25 +1,26 @@
 pub use entity::hit::*;
 pub use entity::sphere::*;
+pub use material::{Lambertian, Material, Metal};
 pub use ray::Ray;
 
 use crate::color::Color;
-use crate::math::Vec3;
 use crate::math::{norm, INFINITY};
 
 mod entity;
+mod material;
 pub mod ray;
 
 pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	if depth <= 0 {
-		Color::new();
+		return Color::new();
 	}
 	let opt = trace(&r, 0.001, INFINITY, entities);
 	if let Some(rec) = opt {
-		let target = rec.point() + Vec3::random_in_hemisphere(rec.normal());
-		let child_ray = Ray::from(rec.point(), &(target - rec.point()));
-		return 0.5 * ray_color(&child_ray, entities, depth - 1);
+		if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
+			return attenuation * ray_color(&scattered, entities, depth - 1);
+		}
+		return Color::new();
 	}
-
 	let unit_dir = norm(r.direction());
 	let t = 0.5 * (unit_dir.y() + 1.0);
 	Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t

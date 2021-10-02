@@ -26,6 +26,10 @@ pub fn norm(v: &Vec3) -> Vec3 {
 	v / v.len()
 }
 
+pub fn reflect(v: &Vec3, normal: &Vec3) -> Vec3 {
+	v - 2.0 * dot(v, normal) * normal
+}
+
 pub type Point3 = Vec3;
 
 impl Vec3 {
@@ -47,6 +51,11 @@ impl Vec3 {
 		Self {
 			e: (rand_rng(min, max), rand_rng(min, max), rand_rng(min, max)),
 		}
+	}
+
+	pub fn near_zero(&self) -> bool {
+		let s = 1e-8;
+		self.e.0.abs() < s && self.e.1.abs() < s && self.e.2 < s
 	}
 
 	pub fn random_in_unit_sphere() -> Self {
@@ -288,6 +297,16 @@ impl ops::Mul<Vec3> for f64 {
 	}
 }
 
+impl ops::Mul<&Vec3> for f64 {
+	type Output = Vec3;
+
+	fn mul(self, rhs: &Vec3) -> Self::Output {
+		Vec3 {
+			e: (rhs.e.0 * self, rhs.e.1 * self, rhs.e.2 * self),
+		}
+	}
+}
+
 impl ops::Mul<f64> for Vec3 {
 	type Output = Vec3;
 
@@ -427,5 +446,13 @@ mod test {
 	fn test_mul_with_scaler() {
 		let v = Vec3::from(-2.0, 4.0, 5.0) * (1.0 / 2.0);
 		assert_eq!(v, Vec3::from(-1.0, 2.0, 2.5));
+	}
+
+	#[test]
+	fn test_reflect() {
+		let normal = Vec3::from(0.0, 1.0, 0.0);
+		let v = Vec3::from(-1.0, 1.0, 0.0);
+		let r = reflect(&v, &normal);
+		assert_eq!(r, Vec3::from(-1.0, -1.0, 0.0));
 	}
 }

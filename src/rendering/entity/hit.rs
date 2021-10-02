@@ -1,25 +1,33 @@
+use std::rc::Rc;
+
 use crate::math::{dot, Point3, Vec3};
-use crate::rendering::Ray;
+use crate::rendering::{Material, Ray};
 
 pub struct HitRecord {
 	p: Point3,
 	normal: Vec3,
 	t: f64,
 	front_face: bool,
+	mat: Rc<dyn Material>,
 }
 
 impl HitRecord {
-	pub fn new() -> Self {
+	pub fn new(mat: Rc<dyn Material>) -> Self {
 		Self {
 			p: Point3::new(),
 			t: 0.0,
 			normal: Vec3::new(),
 			front_face: false,
+			mat,
 		}
 	}
 
 	pub fn normal(&self) -> &Vec3 {
 		&self.normal
+	}
+
+	pub fn material(&self) -> Rc<dyn Material> {
+		Rc::clone(&self.mat)
 	}
 
 	pub fn t_mut(&mut self) -> &mut f64 {
