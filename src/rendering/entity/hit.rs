@@ -26,6 +26,10 @@ impl HitRecord {
 		&self.normal
 	}
 
+	pub fn front_face(&self) -> bool {
+		self.front_face
+	}
+
 	pub fn material(&self) -> Rc<dyn Material> {
 		Rc::clone(&self.mat)
 	}

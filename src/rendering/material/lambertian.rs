@@ -39,6 +39,12 @@ impl Material for Lambertian {
 		// 	scatter_direction = *rec.normal();
 		// }
 
+		// Some((
+		// 	self.albedo.clone(),
+		// 	Ray::from(rec.point(), &scatter_direction),
+		// ))
+
+		// my solution
 		Some((
 			self.albedo.clone(),
 			Ray::from(rec.point(), &Vec3::random_in_hemisphere(rec.normal())),

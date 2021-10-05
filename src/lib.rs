@@ -4,6 +4,7 @@ use std::rc::Rc;
 use color::{write_color, Color};
 use rendering::{ray_color, Sphere};
 
+use crate::rendering::Dielectric;
 use crate::{
 	camera::Camera,
 	math::{rand, Point3},
@@ -24,32 +25,32 @@ pub fn run() {
 	let max_depth = 50;
 
 	// Materials
-	let ground = Rc::new(Lambertian::from(Color::from(0.8, 0.8, 0.0)));
-	let center = Rc::new(Lambertian::from(Color::from(0.7, 0.3, 0.3)));
-	let left = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8)));
-	let right = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2)));
+	let grass = Rc::new(Lambertian::from(Color::from(0.8, 0.8, 0.0)));
+	let glass = Rc::new(Dielectric::from(1.5));
+	let smooth_metal = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8), 0.3));
+	let rough_metal = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2), 1.0));
 
 	// Entities
 	let mut entities: Vec<Box<dyn Hit>> = vec![];
 	entities.push(Box::new(Sphere::from(
 		Point3::from(0.0, 0.0, -1.0),
 		0.5,
-		center.clone(),
+		glass.clone(),
 	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(1.0, 0.0, -1.0),
 		0.5,
-		right.clone(),
+		rough_metal.clone(),
 	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(-1.0, 0.0, -1.0),
 		0.5,
-		left.clone(),
+		smooth_metal.clone(),
 	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(0.0, -100.5, -1.0),
 		100.0,
-		ground.clone(),
+		grass.clone(),
 	)));
 
 	// Camera

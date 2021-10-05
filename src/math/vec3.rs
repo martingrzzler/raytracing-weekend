@@ -30,6 +30,13 @@ pub fn reflect(v: &Vec3, normal: &Vec3) -> Vec3 {
 	v - 2.0 * dot(v, normal) * normal
 }
 
+pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+	let cos_theta = dot(&(-uv), n).min(1.0);
+	let r_out_perp = etai_over_etat * (uv + cos_theta * n);
+	let r_out_parallel = -((1.0 - r_out_perp.len_squared()).abs().sqrt()) * n;
+	r_out_perp + r_out_parallel
+}
+
 pub type Point3 = Vec3;
 
 impl Vec3 {
@@ -93,6 +100,16 @@ impl Vec3 {
 		self.e.2
 	}
 
+	pub fn round_to(&self, to: i32) -> Self {
+		Self {
+			e: (
+				(to as f64 * self.e.0).round() / to as f64,
+				(to as f64 * self.e.1).round() / to as f64,
+				(to as f64 * self.e.2).round() / to as f64,
+			),
+		}
+	}
+
 	pub fn len(&self) -> f64 {
 		self.len_squared().sqrt()
 	}
@@ -107,6 +124,16 @@ impl ops::Neg for Vec3 {
 
 	fn neg(self) -> Self::Output {
 		Self {
+			e: (-self.e.0, -self.e.1, -self.e.2),
+		}
+	}
+}
+
+impl ops::Neg for &Vec3 {
+	type Output = Vec3;
+
+	fn neg(self) -> Self::Output {
+		Vec3 {
 			e: (-self.e.0, -self.e.1, -self.e.2),
 		}
 	}
@@ -129,6 +156,17 @@ impl ops::Add for &Vec3 {
 		}
 	}
 }
+
+impl ops::Add<f64> for &Vec3 {
+	type Output = Vec3;
+
+	fn add(self, rhs: f64) -> Vec3 {
+		Vec3 {
+			e: (self.e.0 + rhs, self.e.1 + rhs, self.e.2 + rhs),
+		}
+	}
+}
+
 impl ops::Add<Vec3> for &Vec3 {
 	type Output = Vec3;
 
@@ -237,7 +275,7 @@ impl ops::Mul for Vec3 {
 
 	fn mul(self, rhs: Self) -> Self::Output {
 		Self {
-			e: (self.e.0 * rhs.e.0, self.e.1 * rhs.e.1, self.e.2 * self.e.2),
+			e: (self.e.0 * rhs.e.0, self.e.1 * rhs.e.1, self.e.2 * rhs.e.2),
 		}
 	}
 }
@@ -454,5 +492,23 @@ mod test {
 		let v = Vec3::from(-1.0, 1.0, 0.0);
 		let r = reflect(&v, &normal);
 		assert_eq!(r, Vec3::from(-1.0, -1.0, 0.0));
+	}
+
+	#[test]
+	fn test_refract() {
+		let normal = Vec3::from(0.0, 1.0, 0.0);
+		let uv = norm(&Vec3::from(1.0, -1.0, 0.0));
+		let etai_over_etat = 1.0 / 1.5;
+
+		assert_eq!(
+			refract(&uv, &normal, etai_over_etat).round_to(10_000),
+			Vec3::from(0.4714, -0.8819, 0.0)
+		);
+	}
+
+	#[test]
+	fn test_round_to() {
+		let v = Vec3::from(1.234, 3.234, 6.34534);
+		assert_eq!(v.round_to(100), Vec3::from(1.23, 3.23, 6.35));
 	}
 }

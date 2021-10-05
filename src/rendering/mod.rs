@@ -1,6 +1,6 @@
 pub use entity::hit::*;
 pub use entity::sphere::*;
-pub use material::{Lambertian, Material, Metal};
+pub use material::{Dielectric, Lambertian, Material, Metal};
 pub use ray::Ray;
 
 use crate::color::Color;
@@ -23,7 +23,8 @@ pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	}
 	let unit_dir = norm(r.direction());
 	let t = 0.5 * (unit_dir.y() + 1.0);
-	Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t
+	let res = Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t;
+	res
 }
 
 fn trace(r: &Ray, t_min: f64, t_max: f64, entities: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {

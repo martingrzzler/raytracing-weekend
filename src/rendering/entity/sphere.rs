@@ -34,17 +34,17 @@ impl Hit for Sphere {
 		let oc = r.origin() - &self.center;
 		let a = r.direction().len_squared();
 		let half_b = dot(&oc, &r.direction());
-		let c = oc.len_squared() - self.radius * self.radius;
+		let c = oc.len_squared() - (self.radius * self.radius);
 
-		let discriminant = half_b * half_b - a * c;
+		let discriminant = (half_b * half_b) - (a * c);
 		if discriminant < 0.0 {
 			return None;
 		}
 
 		let d_sqrt = discriminant.sqrt();
-		let root = (-half_b - d_sqrt) / a;
+		let mut root = (-half_b - d_sqrt) / a;
 		if root < t_min || t_max < root {
-			let root = (-half_b + d_sqrt) / a;
+			root = (-half_b + d_sqrt) / a;
 			if root < t_min || t_max < root {
 				return None;
 			}
