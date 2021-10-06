@@ -26,8 +26,10 @@ pub fn run() {
 
 	// Materials
 	let grass = Rc::new(Lambertian::from(Color::from(0.8, 0.8, 0.0)));
+	let diffuse = Rc::new(Lambertian::from(Color::from(0.9, 0.3, 0.2)));
 	let glass = Rc::new(Dielectric::from(1.5));
-	let smooth_metal = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8), 0.3));
+	// let smooth_metal = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8), 0.3));
+	// let super_smooth = Rc::new(Metal::from(Color::from(1.0, 1.0, 1.0), 0.5));
 	let rough_metal = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2), 1.0));
 
 	// Entities
@@ -45,7 +47,13 @@ pub fn run() {
 	entities.push(Box::new(Sphere::from(
 		Point3::from(-1.0, 0.0, -1.0),
 		0.5,
-		smooth_metal.clone(),
+		diffuse.clone(),
+	)));
+	// hack to create glass ball
+	entities.push(Box::new(Sphere::from(
+		Point3::from(0.0, 0.0, -1.0),
+		-0.4,
+		glass.clone(),
 	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(0.0, -100.5, -1.0),
