@@ -58,6 +58,9 @@ impl Hit for Sphere {
 	}
 }
 
+unsafe impl Send for Sphere {}
+unsafe impl Sync for Sphere {}
+
 #[cfg(test)]
 mod test {
 	use super::*;

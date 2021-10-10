@@ -88,6 +88,17 @@ impl Vec3 {
 		}
 	}
 
+	pub fn random_in_unit_disk() -> Self {
+		loop {
+			let p = Vec3::from(rand_rng(-1.0, 1.0), rand_rng(-1.0, 1.0), 0.0);
+			if p.len_squared() >= 1.0 {
+				continue;
+			}
+
+			return p;
+		}
+	}
+
 	pub fn x(&self) -> f64 {
 		self.e.0
 	}

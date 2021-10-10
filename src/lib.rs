@@ -1,91 +1,87 @@
 use std::io::{self, Write};
-use std::rc::Rc;
+use std::sync::mpsc::channel;
+use std::sync::Arc;
 
 use color::{write_color, Color};
-use rendering::{ray_color, Sphere};
+use rendering::ray_color;
+use threadpool::ThreadPool;
 
-use crate::rendering::Dielectric;
+use crate::output::pixels_to_file;
+use crate::rendering::random_scene;
 use crate::{
 	camera::Camera,
 	math::{rand, Point3, Vec3},
-	rendering::{Hit, Lambertian, Metal},
+	output::Pixel,
 };
 
 mod camera;
 mod color;
 mod math;
+mod output;
 mod rendering;
 
 pub fn run() {
+	// Processing
+	let pool = ThreadPool::new(6);
+	let (tx, rx) = channel();
+
 	// Image
 	let aspect_ratio = 16.0 / 9.0;
-	let image_width = 400;
+	let image_width = 500;
 	let image_height = (image_width as f64 / aspect_ratio) as i32;
-	let samples_per_pixel = 100;
+	let samples_per_pixel = 3;
 	let max_depth = 50;
 
-	// Materials
-	let grass = Rc::new(Lambertian::from(Color::from(0.8, 0.8, 0.0)));
-	let diffuse = Rc::new(Lambertian::from(Color::from(0.9, 0.3, 0.2)));
-	let glass = Rc::new(Dielectric::from(1.5));
-	let smooth_metal = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8), 0.3));
-	// let super_smooth = Rc::new(Metal::from(Color::from(1.0, 1.0, 1.0), 0.5));
-	// let rough_metal = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2), 1.0));
-
 	// Entities
-	let mut entities: Vec<Box<dyn Hit>> = vec![];
-	entities.push(Box::new(Sphere::from(
-		Point3::from(0.0, 0.0, -1.0),
-		0.5,
-		diffuse.clone(),
-	)));
-	entities.push(Box::new(Sphere::from(
-		Point3::from(1.0, 0.0, -1.0),
-		0.5,
-		smooth_metal.clone(),
-	)));
-	entities.push(Box::new(Sphere::from(
-		Point3::from(-1.0, 0.0, -1.0),
-		0.5,
-		glass.clone(),
-	)));
-	// hack to create glass ball
-	entities.push(Box::new(Sphere::from(
-		Point3::from(-1.0, 0.0, -1.0),
-		-0.4,
-		glass.clone(),
-	)));
-	entities.push(Box::new(Sphere::from(
-		Point3::from(0.0, -100.5, -1.0),
-		100.0,
-		grass.clone(),
-	)));
+	let entities = Arc::new(random_scene());
 
 	// Camera
-	let look_from = Point3::from(-2.0, 2.0, 1.0);
-	let look_at = Point3::from(0.0, 0.0, -1.0);
+	let look_from = Point3::from(13.0, 2.0, 3.0);
+	let look_at = Point3::from(0.0, 0.0, 0.0);
 	let vup = Vec3::from(0.0, 1.0, 0.0);
-	let cam = Camera::new(look_from, look_at, vup, 90.0, aspect_ratio);
+	let focus_distance = 10.0;
+	let aperture = 0.1;
+	let cam = Camera::new(
+		look_from,
+		look_at,
+		vup,
+		20.0,
+		aspect_ratio,
+		aperture,
+		focus_distance,
+	);
 
 	// Render
-	print!("P3\n{} {}\n255\n", image_width, image_height);
+	let mut pixels: Vec<Pixel> = Vec::with_capacity((image_height * image_width) as usize);
 	for j in 0..image_height {
-		eprint!(
-			"\rProgress: {}%",
-			(((j as f64) + 1.0) / (image_height as f64) * 100.0) as i32
-		);
-		io::stderr().flush().unwrap();
 		for i in 0..image_width {
+			eprint!(
+				"\rProgress: {:.2}%",
+				((j * image_width + i + 1) as f64 / ((image_height * image_width) as f64) * 100.0)
+			);
+			io::stderr().flush().unwrap();
 			let mut pixel_color = Color::new();
 			for _ in 0..samples_per_pixel {
 				let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
 				let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
 				let r = cam.calc_ray(u, v);
-				pixel_color += ray_color(&r, &entities, max_depth);
+				let tx = tx.clone();
+				let entities = Arc::clone(&entities);
+				pool.execute(move || {
+					let color = ray_color(&r, Arc::downgrade(&entities), max_depth);
+					tx.send(color)
+						.expect("Failed sending Color between threads.");
+				});
+				// pixel_color += ray_color(&r, &entities, max_depth);
 			}
-			write_color(pixel_color, samples_per_pixel);
+			for _ in 0..samples_per_pixel {
+				pixel_color += rx.recv().expect("Receiving Color from other thread failed");
+			}
+			write_color(&mut pixels, pixel_color, samples_per_pixel);
 		}
 	}
+	eprint!("\rWriting to file...");
+	pixels_to_file(pixels, image_height, image_width);
 	eprintln!("\nDone.");
 	io::stderr().flush().unwrap();
 }

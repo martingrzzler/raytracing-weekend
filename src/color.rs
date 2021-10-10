@@ -1,8 +1,11 @@
-use crate::math::{clamp, Vec3};
+use crate::{
+	math::{clamp, Vec3},
+	output::Pixel,
+};
 
 pub type Color = Vec3;
 
-pub fn write_color(color: Color, samples_per_pixel: i32) {
+pub fn write_color(out: &mut Vec<Pixel>, color: Color, samples_per_pixel: i32) {
 	let Color {
 		e: (mut r, mut g, mut b),
 	} = color;
@@ -14,10 +17,9 @@ pub fn write_color(color: Color, samples_per_pixel: i32) {
 	g = (scale * g).sqrt();
 	b = (scale * b).sqrt();
 
-	println!(
-		"{} {} {}",
+	out.push(Pixel::from(
 		(256.0 * clamp(r, 0.0, 0.999)) as i32,
 		(256.0 * clamp(g, 0.0, 0.999)) as i32,
 		(256.0 * clamp(b, 0.0, 0.999)) as i32,
-	);
+	))
 }
