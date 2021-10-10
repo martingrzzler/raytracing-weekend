@@ -7,7 +7,7 @@ use rendering::{ray_color, Sphere};
 use crate::rendering::Dielectric;
 use crate::{
 	camera::Camera,
-	math::{rand, Point3},
+	math::{rand, Point3, Vec3},
 	rendering::{Hit, Lambertian, Metal},
 };
 
@@ -28,30 +28,30 @@ pub fn run() {
 	let grass = Rc::new(Lambertian::from(Color::from(0.8, 0.8, 0.0)));
 	let diffuse = Rc::new(Lambertian::from(Color::from(0.9, 0.3, 0.2)));
 	let glass = Rc::new(Dielectric::from(1.5));
-	// let smooth_metal = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8), 0.3));
+	let smooth_metal = Rc::new(Metal::from(Color::from(0.8, 0.8, 0.8), 0.3));
 	// let super_smooth = Rc::new(Metal::from(Color::from(1.0, 1.0, 1.0), 0.5));
-	let rough_metal = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2), 1.0));
+	// let rough_metal = Rc::new(Metal::from(Color::from(0.8, 0.6, 0.2), 1.0));
 
 	// Entities
 	let mut entities: Vec<Box<dyn Hit>> = vec![];
 	entities.push(Box::new(Sphere::from(
 		Point3::from(0.0, 0.0, -1.0),
 		0.5,
-		glass.clone(),
+		diffuse.clone(),
 	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(1.0, 0.0, -1.0),
 		0.5,
-		rough_metal.clone(),
+		smooth_metal.clone(),
 	)));
 	entities.push(Box::new(Sphere::from(
 		Point3::from(-1.0, 0.0, -1.0),
 		0.5,
-		diffuse.clone(),
+		glass.clone(),
 	)));
 	// hack to create glass ball
 	entities.push(Box::new(Sphere::from(
-		Point3::from(0.0, 0.0, -1.0),
+		Point3::from(-1.0, 0.0, -1.0),
 		-0.4,
 		glass.clone(),
 	)));
@@ -62,7 +62,10 @@ pub fn run() {
 	)));
 
 	// Camera
-	let cam = Camera::new();
+	let look_from = Point3::from(-2.0, 2.0, 1.0);
+	let look_at = Point3::from(0.0, 0.0, -1.0);
+	let vup = Vec3::from(0.0, 1.0, 0.0);
+	let cam = Camera::new(look_from, look_at, vup, 90.0, aspect_ratio);
 
 	// Render
 	print!("P3\n{} {}\n255\n", image_width, image_height);

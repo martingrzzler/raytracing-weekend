@@ -37,3 +37,15 @@ pub fn clamp<T: PartialOrd>(input: T, min: T, max: T) -> T {
 		input
 	}
 }
+
+#[cfg(test)]
+mod test {
+
+	use super::*;
+
+	#[test]
+	fn test_degress_to_radians() {
+		let degrees = 90.0;
+		assert_eq!(PI / 2.0, radians(degrees));
+	}
+}
