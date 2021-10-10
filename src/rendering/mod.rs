@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use std::sync::Weak;
 
 pub use entity::hit::*;
 pub use entity::sphere::*;
@@ -14,14 +13,14 @@ mod entity;
 mod material;
 pub mod ray;
 
-pub fn ray_color(r: &Ray, entities: Weak<Vec<Box<dyn Hit + Send + Sync>>>, depth: i32) -> Color {
+pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit + Send + Sync>>, depth: i32) -> Color {
 	if depth <= 0 {
 		return Color::new();
 	}
-	let opt = trace(&r, 0.001, INFINITY, Weak::clone(&entities));
+	let opt = trace(&r, 0.001, INFINITY, entities);
 	if let Some(rec) = opt {
 		if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
-			return attenuation * ray_color(&scattered, Weak::clone(&entities), depth - 1);
+			return attenuation * ray_color(&scattered, entities, depth - 1);
 		}
 		return Color::new();
 	}
@@ -35,11 +34,11 @@ fn trace(
 	r: &Ray,
 	t_min: f64,
 	t_max: f64,
-	entities: Weak<Vec<Box<dyn Hit + Send + Sync>>>,
+	entities: &Vec<Box<dyn Hit + Send + Sync>>,
 ) -> Option<HitRecord> {
 	let mut closest = t_max;
 	let mut rec: Option<HitRecord> = None;
-	for e in entities.upgrade().unwrap().iter() {
+	for e in entities.iter() {
 		let opt = e.hit(&r, t_min, closest);
 		if let Some(tmp) = opt {
 			closest = tmp.t();

@@ -2,6 +2,8 @@ use std::env;
 use std::fmt::Write;
 use std::fs::File;
 use std::io::Write as IoWrite;
+
+#[derive(Copy, Clone)]
 pub struct Pixel {
 	r: i32,
 	g: i32,
@@ -11,6 +13,9 @@ pub struct Pixel {
 impl Pixel {
 	pub fn from(r: i32, g: i32, b: i32) -> Self {
 		Self { r, g, b }
+	}
+	pub fn new() -> Self {
+		Self { r: 0, b: 0, g: 0 }
 	}
 
 	pub fn r(&self) -> i32 {
@@ -24,7 +29,7 @@ impl Pixel {
 	}
 }
 
-pub fn pixels_to_file(pixels: Vec<Pixel>, image_height: i32, image_width: i32) {
+pub fn pixels_to_file(pixels: &[Pixel], image_height: i32, image_width: i32) {
 	let args: Vec<String> = env::args().collect();
 	let path = format!("./assets/{}", args[1]);
 	let mut file = File::create(path).expect("File creation failed");
