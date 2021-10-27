@@ -13,7 +13,7 @@ mod entity;
 mod material;
 pub mod ray;
 
-pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit + Send + Sync>>, depth: i32) -> Color {
+pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	if depth <= 0 {
 		return Color::new();
 	}
@@ -30,12 +30,7 @@ pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit + Send + Sync>>, depth: i32
 	res
 }
 
-fn trace(
-	r: &Ray,
-	t_min: f64,
-	t_max: f64,
-	entities: &Vec<Box<dyn Hit + Send + Sync>>,
-) -> Option<HitRecord> {
+fn trace(r: &Ray, t_min: f64, t_max: f64, entities: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {
 	let mut closest = t_max;
 	let mut rec: Option<HitRecord> = None;
 	for e in entities.iter() {
@@ -49,8 +44,8 @@ fn trace(
 	rec
 }
 
-pub fn random_scene() -> Vec<Box<dyn Hit + Send + Sync>> {
-	let mut entities: Vec<Box<dyn Hit + Send + Sync>> = vec![];
+pub fn random_scene() -> Vec<Box<dyn Hit>> {
+	let mut entities: Vec<Box<dyn Hit>> = vec![];
 	let ground_mat = Lambertian::from(Color::from(0.5, 0.5, 0.5));
 	let ground = Box::new(Sphere::from(
 		Point3::from(0.0, -1000.0, 0.0),

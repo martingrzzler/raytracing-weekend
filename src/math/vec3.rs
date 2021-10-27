@@ -1,7 +1,10 @@
 #![allow(dead_code)]
 use super::{rand, rand_rng};
 use core::panic;
-use std::ops::{self};
+use std::{
+	iter,
+	ops::{self},
+};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
@@ -127,6 +130,24 @@ impl Vec3 {
 
 	pub fn len_squared(&self) -> f64 {
 		self.e.0 * self.e.0 + self.e.1 * self.e.1 + self.e.2 * self.e.2
+	}
+}
+
+impl iter::Sum for Vec3 {
+	fn sum<I>(iter: I) -> Vec3
+	where
+		I: Iterator<Item = Vec3>,
+	{
+		iter.fold(Vec3::new(), ops::Add::add)
+	}
+}
+
+impl<'a> iter::Sum<&'a Vec3> for Vec3 {
+	fn sum<I>(iter: I) -> Vec3
+	where
+		I: Iterator<Item = &'a Vec3>,
+	{
+		iter.fold(Vec3::new(), ops::Add::add)
 	}
 }
 
@@ -521,5 +542,13 @@ mod test {
 	fn test_round_to() {
 		let v = Vec3::from(1.234, 3.234, 6.34534);
 		assert_eq!(v.round_to(100), Vec3::from(1.23, 3.23, 6.35));
+	}
+
+	#[test]
+	fn test_iter_sum() {
+		let v = Vec3::from(1.0, 1.0, 1.0);
+		let vs = vec![v, v, v];
+
+		assert_eq!(Vec3::from(3.0, 3.0, 3.0), vs.iter().sum());
 	}
 }
