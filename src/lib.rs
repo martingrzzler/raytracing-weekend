@@ -21,7 +21,7 @@ mod rendering;
 pub fn run() {
 	// Image
 	const aspect_ratio: f64 = 16.0 / 9.0;
-	const image_width: i32 = 500;
+	const image_width: i32 = 100;
 	const image_height: i32 = (image_width as f64 / aspect_ratio) as i32;
 	let samples_per_pixel = 1;
 	let max_depth = 50;
