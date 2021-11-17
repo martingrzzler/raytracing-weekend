@@ -18,7 +18,7 @@ mod math;
 mod output;
 mod rendering;
 
-pub fn run() {
+pub fn run(args: Vec<String>) {
 	// Image
 	const aspect_ratio: f64 = 16.0 / 9.0;
 	const image_width: i32 = 100;
@@ -68,7 +68,17 @@ pub fn run() {
 	}
 
 	eprint!("\rWriting to file...");
-	pixels_to_file(&pixels, image_height, image_width);
+	pixels_to_file(&pixels, image_height, image_width, args);
 	eprintln!("\nDone.");
 	io::stderr().flush().unwrap();
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn test_run_should_run() {
+		run(vec!["".to_string(), "test.ppm".to_string()])
+	}
 }
