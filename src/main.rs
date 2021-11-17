@@ -1,8 +1,11 @@
 use std::env;
 
-use raytracing_weekend::run;
+use raytracing_weekend::{run, Options};
 
 fn main() {
     let args = env::args().collect();
-    run(args);
+    let opts = Options {
+        ..Default::default()
+    };
+    run(args, opts);
 }

@@ -18,14 +18,16 @@ mod math;
 mod output;
 mod rendering;
 
-pub fn run(args: Vec<String>) {
-	// Image
-	const aspect_ratio: f64 = 16.0 / 9.0;
-	const image_width: i32 = 100;
-	const image_height: i32 = (image_width as f64 / aspect_ratio) as i32;
-	let samples_per_pixel = 1;
-	let max_depth = 50;
-
+pub fn run(
+	args: Vec<String>,
+	Options {
+		aspect_ratio,
+		image_width,
+		image_height,
+		samples_per_pixel,
+		max_depth,
+	}: Options,
+) {
 	// Entities
 	let entities = random_scene();
 
@@ -73,14 +75,49 @@ pub fn run(args: Vec<String>) {
 	io::stderr().flush().unwrap();
 }
 
+pub struct Options {
+	pub aspect_ratio: f64,
+	pub image_width: i32,
+	pub image_height: i32,
+	pub samples_per_pixel: i32,
+	pub max_depth: i32,
+}
+
+impl Default for Options {
+	fn default() -> Options {
+		let aspect_ratio = 16.0 / 9.0;
+		let image_width = 500;
+		Options {
+			aspect_ratio,
+			image_width,
+			image_height: calc_height(image_width, aspect_ratio),
+			samples_per_pixel: 50,
+			max_depth: 50,
+		}
+	}
+}
+
+fn calc_height(width: i32, aspect_ratio: f64) -> i32 {
+	(width as f64 / aspect_ratio) as i32
+}
+
 #[cfg(test)]
 mod test {
 	use super::*;
 
 	#[test]
 	fn test_run_should_run() {
-		let file_name = String::from("test.ppm");
-		run(vec!["".to_string(), file_name.clone()]);
+		let file_name = "test.ppm";
+		let args = vec!["".to_string(), file_name.to_string()];
+
+		let opts = Options {
+			image_width: 50,
+			image_height: calc_height(50, 16.0 / 9.0),
+			aspect_ratio: 16.0 / 9.0,
+			samples_per_pixel: 1,
+			..Default::default()
+		};
+		run(args, opts);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
