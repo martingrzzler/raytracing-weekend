@@ -79,6 +79,9 @@ mod test {
 
 	#[test]
 	fn test_run_should_run() {
-		run(vec!["".to_string(), "test.ppm".to_string()])
+		let file_name = String::from("test.ppm");
+		run(vec!["".to_string(), file_name.clone()]);
+
+		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
 }
