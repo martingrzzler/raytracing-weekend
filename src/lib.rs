@@ -2,7 +2,6 @@
 use std::io::{self, Write};
 
 use color::{write_color, Color};
-use rayon::prelude::*;
 use rendering::ray_color;
 
 use crate::output::pixels_to_file;
@@ -57,7 +56,6 @@ pub fn render_image(
 			);
 			io::stderr().flush().unwrap();
 			let pixel_color: Color = (0..samples_per_pixel)
-				.into_par_iter()
 				.map(|_sample| {
 					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
 					let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
