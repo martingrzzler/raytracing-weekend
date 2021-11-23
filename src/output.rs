@@ -1,4 +1,3 @@
-use std::env;
 use std::fmt::Write;
 use std::fs::File;
 use std::io::Write as IoWrite;

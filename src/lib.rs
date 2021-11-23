@@ -20,13 +20,13 @@ mod rendering;
 
 pub fn run(
 	args: Vec<String>,
-	Options {
+	Settings {
 		aspect_ratio,
 		image_width,
 		image_height,
 		samples_per_pixel,
 		max_depth,
-	}: Options,
+	}: Settings,
 ) {
 	// Entities
 	let entities = random_scene();
@@ -75,7 +75,7 @@ pub fn run(
 	io::stderr().flush().unwrap();
 }
 
-pub struct Options {
+pub struct Settings {
 	pub aspect_ratio: f64,
 	pub image_width: i32,
 	pub image_height: i32,
@@ -83,11 +83,11 @@ pub struct Options {
 	pub max_depth: i32,
 }
 
-impl Default for Options {
-	fn default() -> Options {
+impl Settings {
+	pub fn new() -> Self {
 		let aspect_ratio = 16.0 / 9.0;
 		let image_width = 500;
-		Options {
+		Settings {
 			aspect_ratio,
 			image_width,
 			image_height: calc_height(image_width, aspect_ratio),
@@ -110,14 +110,14 @@ mod test {
 		let file_name = "test.ppm";
 		let args = vec!["".to_string(), file_name.to_string()];
 
-		let opts = Options {
+		let settings = Settings {
 			image_width: 50,
 			image_height: calc_height(50, 16.0 / 9.0),
 			aspect_ratio: 16.0 / 9.0,
 			samples_per_pixel: 1,
-			..Default::default()
+			max_depth: 50,
 		};
-		run(args, opts);
+		run(args, settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
