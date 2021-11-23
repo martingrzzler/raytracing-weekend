@@ -28,8 +28,8 @@ impl Pixel {
 	}
 }
 
-pub fn pixels_to_file(pixels: &[Pixel], image_height: i32, image_width: i32, args: Vec<String>) {
-	let path = format!("./assets/{}", args[1]);
+pub fn pixels_to_file(pixels: &[Pixel], image_height: i32, image_width: i32, file_name: &str) {
+	let path = format!("./assets/{}", file_name);
 	let mut file = File::create(path).expect("File creation failed");
 	let mut out = format!("P3\n{} {}\n255\n", image_width, image_height);
 	for p in pixels.iter() {

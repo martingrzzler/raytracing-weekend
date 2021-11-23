@@ -71,7 +71,7 @@ pub fn run(
 	}
 
 	eprint!("\rWriting to file...");
-	pixels_to_file(&pixels, image_height, image_width, args);
+	pixels_to_file(&pixels, image_height, image_width, &file_name);
 	eprintln!("\nDone.");
 	io::stderr().flush().unwrap();
 }
