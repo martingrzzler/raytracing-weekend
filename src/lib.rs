@@ -108,7 +108,7 @@ mod test {
 	use super::*;
 
 	#[test]
-	fn test_run_should_run() {
+	fn test_render_image_creates_image() {
 		let file_name = "test.ppm";
 		let settings = Settings {
 			image_width: 50,
