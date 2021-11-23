@@ -1,11 +1,13 @@
 #![allow(non_upper_case_globals)]
+pub use rendering::random_scene;
+
 use std::io::{self, Write};
 
 use color::{write_color, Color};
 use rendering::ray_color;
 
 use crate::output::pixels_to_file;
-use crate::rendering::random_scene;
+use crate::rendering::Hit;
 use crate::{
 	camera::Camera,
 	math::{rand, Point3, Vec3},
@@ -18,6 +20,7 @@ mod output;
 mod rendering;
 
 pub fn render_image(
+	scene: Vec<Box<dyn Hit>>,
 	Settings {
 		aspect_ratio,
 		image_width,
@@ -27,9 +30,6 @@ pub fn render_image(
 		file_name,
 	}: Settings,
 ) {
-	// Entities
-	let entities = random_scene();
-
 	// Camera
 	let look_from = Point3::from(13.0, 2.0, 3.0);
 	let look_at = Point3::from(0.0, 0.0, 0.0);
@@ -60,7 +60,7 @@ pub fn render_image(
 					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
 					let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
 					let r = cam.calc_ray(u, v);
-					ray_color(&r, &entities, max_depth)
+					ray_color(&r, &scene, max_depth)
 				})
 				.sum();
 			write_color(&mut pixels, pixel_color, samples_per_pixel);
@@ -116,7 +116,8 @@ mod test {
 			max_depth: 50,
 			file_name: "test.ppm".to_string(),
 		};
-		render_image(settings);
+		let scene = random_scene();
+		render_image(scene, settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
