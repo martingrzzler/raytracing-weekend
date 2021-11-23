@@ -19,7 +19,6 @@ mod output;
 mod rendering;
 
 pub fn run(
-	args: Vec<String>,
 	Settings {
 		aspect_ratio,
 		image_width,
@@ -111,8 +110,6 @@ mod test {
 	#[test]
 	fn test_run_should_run() {
 		let file_name = "test.ppm";
-		let args = vec!["".to_string(), file_name.to_string()];
-
 		let settings = Settings {
 			image_width: 50,
 			image_height: calc_height(50, 16.0 / 9.0),
@@ -121,7 +118,7 @@ mod test {
 			max_depth: 50,
 			file_name: "test.ppm".to_string(),
 		};
-		run(args, settings);
+		run(settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
