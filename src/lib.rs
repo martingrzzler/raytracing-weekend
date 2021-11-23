@@ -49,10 +49,13 @@ pub fn render_image(
 	let mut pixels = vec![];
 	for j in 0..image_height {
 		for i in 0..image_width {
-			print_progress(calc_progress(
-				current_pixel(image_width, i, j),
-				image_height * image_width,
-			));
+			Progress {
+				curr_height: j,
+				curr_width: i,
+				total_height: image_height,
+				total_width: image_width,
+			}
+			.print();
 			let pixel_color: Color = (0..samples_per_pixel)
 				.map(|_sample| {
 					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
@@ -105,21 +108,30 @@ impl Settings {
 	}
 }
 
+struct Progress {
+	pub curr_width: i32,
+	pub curr_height: i32,
+	pub total_height: i32,
+	pub total_width: i32,
+}
+
+impl Progress {
+	fn calc(&self) -> f64 {
+		(self.curr_pixel() as f64 / (self.total_height * self.total_width) as f64) * 100.0
+	}
+
+	fn curr_pixel(&self) -> i32 {
+		self.curr_height * self.total_width + self.curr_width + 1
+	}
+
+	pub fn print(&self) {
+		eprint!("\rProgress: {:.2}%", self.calc());
+		io::stderr().flush().unwrap();
+	}
+}
+
 fn calc_height(width: i32, aspect_ratio: f64) -> i32 {
 	(width as f64 / aspect_ratio) as i32
-}
-
-fn print_progress(p: f64) {
-	eprint!("\rProgress: {:.2}%", p);
-	io::stderr().flush().unwrap();
-}
-
-fn calc_progress(current: i32, total: i32) -> f64 {
-	(current as f64 / total as f64) * 100.0
-}
-
-fn current_pixel(total_width: i32, curr_width: i32, curr_height: i32) -> i32 {
-	curr_height * total_width + curr_width + 1
 }
 
 #[cfg(test)]
@@ -150,15 +162,5 @@ mod test {
 		render_image(scene, settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
-	}
-
-	#[test]
-	fn test_calc_progress() {
-		assert_eq!(calc_progress(4, 10), 40.0);
-	}
-
-	#[test]
-	fn test_current_pixel() {
-		assert_eq!(current_pixel(100, 5, 2), 206);
 	}
 }
