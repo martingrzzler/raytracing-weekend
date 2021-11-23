@@ -49,9 +49,10 @@ pub fn render_image(
 	let mut pixels = vec![];
 	for j in 0..image_height {
 		for i in 0..image_width {
-			let progress =
-				(j * image_width + i + 1) as f64 / ((image_height * image_width) as f64) * 100.0;
-			print_progress(progress);
+			print_progress(calc_progress(
+				current_pixel(image_width, i, j),
+				image_height * image_width,
+			));
 			let pixel_color: Color = (0..samples_per_pixel)
 				.map(|_sample| {
 					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
@@ -113,6 +114,14 @@ fn print_progress(p: f64) {
 	io::stderr().flush().unwrap();
 }
 
+fn calc_progress(current: i32, total: i32) -> f64 {
+	(current as f64 / total as f64) * 100.0
+}
+
+fn current_pixel(total_width: i32, curr_width: i32, curr_height: i32) -> i32 {
+	curr_height * total_width + curr_width + 1
+}
+
 #[cfg(test)]
 mod test {
 	use super::*;
@@ -141,5 +150,15 @@ mod test {
 		render_image(scene, settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
+	}
+
+	#[test]
+	fn test_calc_progress() {
+		assert_eq!(calc_progress(4, 10), 40.0);
+	}
+
+	#[test]
+	fn test_current_pixel() {
+		assert_eq!(current_pixel(100, 5, 2), 206);
 	}
 }
