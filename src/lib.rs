@@ -28,14 +28,14 @@ pub fn render_image(
 		samples_per_pixel,
 		max_depth,
 		file_name,
+		look_from,
+		look_at,
+		aperture,
+		focus_distance,
 	}: Settings,
 ) {
 	// Camera
-	let look_from = Point3::from(13.0, 2.0, 3.0);
-	let look_at = Point3::from(0.0, 0.0, 0.0);
 	let vup = Vec3::from(0.0, 1.0, 0.0);
-	let focus_distance = 10.0;
-	let aperture = 0.1;
 	let cam = Camera::new(
 		look_from,
 		look_at,
@@ -80,6 +80,10 @@ pub struct Settings {
 	pub samples_per_pixel: i32,
 	pub max_depth: i32,
 	pub file_name: String,
+	pub look_at: Point3,
+	pub look_from: Point3,
+	pub focus_distance: f64,
+	pub aperture: f64,
 }
 
 impl Settings {
@@ -93,6 +97,10 @@ impl Settings {
 			samples_per_pixel: 50,
 			max_depth: 50,
 			file_name: "default.ppm".to_string(),
+			look_from: Point3::from(13.0, 2.0, 3.0),
+			look_at: Point3::from(0.0, 0.0, 0.0),
+			focus_distance: 10.0,
+			aperture: 0.1,
 		}
 	}
 }
@@ -115,6 +123,10 @@ mod test {
 			samples_per_pixel: 1,
 			max_depth: 50,
 			file_name: "test.ppm".to_string(),
+			look_from: Point3::from(13.0, 2.0, 3.0),
+			look_at: Point3::from(0.0, 0.0, 0.0),
+			focus_distance: 10.0,
+			aperture: 0.1,
 		};
 		let scene = random_scene();
 		render_image(scene, settings);
