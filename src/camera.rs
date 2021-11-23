@@ -5,6 +5,15 @@ use crate::{
 	rendering::Ray,
 };
 
+pub struct CameraProps {
+	pub look_from: Point3,
+	pub look_at: Point3,
+	pub aperture: f64,
+	pub focus_distance: f64,
+	pub field_of_view: f64,
+	pub aspect_ratio: f64,
+}
+
 pub struct Camera {
 	origin: Point3,
 	upper_left_corner: Point3,
@@ -17,29 +26,30 @@ pub struct Camera {
 }
 
 impl Camera {
-	pub fn new(
-		look_from: Point3,
-		look_at: Point3,
-		vup: Vec3,
-		v_fov: f64,
-		aspect_ratio: f64,
-		aperture: f64,
-		focus_dist: f64,
+	pub fn from(
+		CameraProps {
+			look_at,
+			look_from,
+			aperture,
+			focus_distance,
+			field_of_view,
+			aspect_ratio,
+		}: CameraProps,
 	) -> Self {
-		let theta = radians(v_fov);
+		let theta = radians(field_of_view);
 		let h = (theta / 2.0).tan();
 		// tan of 45 deg is 1
 		let viewport_height = 2.0 * h;
 		let viewport_width = aspect_ratio * viewport_height;
 
 		let w = norm(&(&look_from - &look_at));
-		let u = norm(&cross(&vup, &w));
+		let u = norm(&cross(&Vec3::from(0.0, 1.0, 0.0), &w));
 		let v = cross(&w, &u);
 
 		let origin = look_from;
-		let horizontal = focus_dist * viewport_width * u;
-		let vertical = focus_dist * viewport_height * v;
-		let upper_left_corner = &origin - &horizontal / 2.0 + &vertical / 2.0 - &w * focus_dist;
+		let horizontal = focus_distance * viewport_width * u;
+		let vertical = focus_distance * viewport_height * v;
+		let upper_left_corner = &origin - &horizontal / 2.0 + &vertical / 2.0 - &w * focus_distance;
 		let lens_radius = aperture / 2.0;
 
 		Self {

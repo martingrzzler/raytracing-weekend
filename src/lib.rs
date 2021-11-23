@@ -6,11 +6,12 @@ use std::io::{self, Write};
 use color::{write_color, Color};
 use rendering::ray_color;
 
+use crate::camera::CameraProps;
 use crate::output::pixels_to_file;
 use crate::rendering::Hit;
 use crate::{
 	camera::Camera,
-	math::{rand, Point3, Vec3},
+	math::{rand, Point3},
 };
 
 mod camera;
@@ -32,19 +33,17 @@ pub fn render_image(
 		look_at,
 		aperture,
 		focus_distance,
+		field_of_view,
 	}: Settings,
 ) {
-	// Camera
-	let vup = Vec3::from(0.0, 1.0, 0.0);
-	let cam = Camera::new(
-		look_from,
+	let cam = Camera::from(CameraProps {
 		look_at,
-		vup,
-		20.0,
+		look_from,
 		aspect_ratio,
 		aperture,
 		focus_distance,
-	);
+		field_of_view,
+	});
 
 	// Render
 	let mut pixels = vec![];
@@ -84,6 +83,7 @@ pub struct Settings {
 	pub look_from: Point3,
 	pub focus_distance: f64,
 	pub aperture: f64,
+	pub field_of_view: f64,
 }
 
 impl Settings {
@@ -101,6 +101,7 @@ impl Settings {
 			look_at: Point3::from(0.0, 0.0, 0.0),
 			focus_distance: 10.0,
 			aperture: 0.1,
+			field_of_view: 20.0,
 		}
 	}
 }
@@ -115,20 +116,25 @@ mod test {
 
 	#[test]
 	fn test_render_image_creates_image() {
+		let image_width = 100;
+		let aspect_ratio = 16.0 / 9.0;
 		let file_name = "test.ppm";
+
 		let settings = Settings {
-			image_width: 50,
-			image_height: calc_height(50, 16.0 / 9.0),
-			aspect_ratio: 16.0 / 9.0,
+			image_width,
+			image_height: calc_height(image_width, aspect_ratio),
+			aspect_ratio,
 			samples_per_pixel: 1,
 			max_depth: 50,
-			file_name: "test.ppm".to_string(),
+			file_name: file_name.to_string(),
 			look_from: Point3::from(13.0, 2.0, 3.0),
 			look_at: Point3::from(0.0, 0.0, 0.0),
 			focus_distance: 10.0,
 			aperture: 0.1,
+			field_of_view: 20.0,
 		};
 		let scene = random_scene();
+
 		render_image(scene, settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
