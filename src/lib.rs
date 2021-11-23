@@ -49,11 +49,9 @@ pub fn render_image(
 	let mut pixels = vec![];
 	for j in 0..image_height {
 		for i in 0..image_width {
-			eprint!(
-				"\rProgress: {:.2}%",
-				((j * image_width + i + 1) as f64 / ((image_height * image_width) as f64) * 100.0)
-			);
-			io::stderr().flush().unwrap();
+			let progress =
+				(j * image_width + i + 1) as f64 / ((image_height * image_width) as f64) * 100.0;
+			print_progress(progress);
 			let pixel_color: Color = (0..samples_per_pixel)
 				.map(|_sample| {
 					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
@@ -108,6 +106,11 @@ impl Settings {
 
 fn calc_height(width: i32, aspect_ratio: f64) -> i32 {
 	(width as f64 / aspect_ratio) as i32
+}
+
+fn print_progress(p: f64) {
+	eprint!("\rProgress: {:.2}%", p);
+	io::stderr().flush().unwrap();
 }
 
 #[cfg(test)]
