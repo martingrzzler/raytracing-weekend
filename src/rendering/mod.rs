@@ -13,14 +13,14 @@ mod entity;
 mod material;
 pub mod ray;
 
-pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
+pub fn ray_color(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	if depth <= 0 {
 		return Color::new();
 	}
-	let opt = trace(&r, 0.001, INFINITY, entities);
+	let opt = trace(&r, 0.001, INFINITY, scene);
 	if let Some(rec) = opt {
 		if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
-			return attenuation * ray_color(&scattered, entities, depth - 1);
+			return attenuation * ray_color(&scattered, scene, depth - 1);
 		}
 		return Color::new();
 	}
@@ -30,10 +30,10 @@ pub fn ray_color(r: &Ray, entities: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	res
 }
 
-fn trace(r: &Ray, t_min: f64, t_max: f64, entities: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {
+fn trace(r: &Ray, t_min: f64, t_max: f64, scene: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {
 	let mut closest = t_max;
 	let mut rec: Option<HitRecord> = None;
-	for e in entities.iter() {
+	for e in scene.iter() {
 		let opt = e.hit(&r, t_min, closest);
 		if let Some(tmp) = opt {
 			closest = tmp.t();
@@ -45,14 +45,14 @@ fn trace(r: &Ray, t_min: f64, t_max: f64, entities: &Vec<Box<dyn Hit>>) -> Optio
 }
 
 pub fn random_scene() -> Vec<Box<dyn Hit>> {
-	let mut entities: Vec<Box<dyn Hit>> = vec![];
+	let mut scene: Vec<Box<dyn Hit>> = vec![];
 	let ground_mat = Lambertian::from(Color::from(0.5, 0.5, 0.5));
 	let ground = Box::new(Sphere::from(
 		Point3::from(0.0, -1000.0, 0.0),
 		1000.0,
 		Rc::new(ground_mat),
 	));
-	entities.push(ground);
+	scene.push(ground);
 
 	for a in -11..11 {
 		for b in -11..11 {
@@ -64,40 +64,40 @@ pub fn random_scene() -> Vec<Box<dyn Hit>> {
 					// diffuse
 					let albedo = Color::from_rand() * Color::from_rand();
 					let mat = Lambertian::from(albedo);
-					entities.push(Box::new(Sphere::from(center, 0.2, Rc::new(mat))));
+					scene.push(Box::new(Sphere::from(center, 0.2, Rc::new(mat))));
 				} else if choose_mat < 0.95 {
 					// metal
 					let albedo = Color::from_rand_rng(0.5, 1.0);
 					let fuzz = rand();
 					let mat = Metal::from(albedo, fuzz);
-					entities.push(Box::new(Sphere::from(center, 0.2, Rc::new(mat))))
+					scene.push(Box::new(Sphere::from(center, 0.2, Rc::new(mat))))
 				} else {
 					// glass
 					let mat = Dielectric::from(1.5);
-					entities.push(Box::new(Sphere::from(center, 0.2, Rc::new(mat))))
+					scene.push(Box::new(Sphere::from(center, 0.2, Rc::new(mat))))
 				}
 			}
 		}
 	}
 
 	let mat = Dielectric::from(1.5);
-	entities.push(Box::new(Sphere::from(
+	scene.push(Box::new(Sphere::from(
 		Point3::from(0.0, 1.0, 0.0),
 		1.0,
 		Rc::new(mat),
 	)));
 	let mat = Lambertian::from(Color::from(0.4, 0.2, 0.1));
-	entities.push(Box::new(Sphere::from(
+	scene.push(Box::new(Sphere::from(
 		Point3::from(-4.0, 1.0, 0.0),
 		1.0,
 		Rc::new(mat),
 	)));
 	let mat = Metal::from(Color::from(0.7, 0.6, 0.5), 0.0);
-	entities.push(Box::new(Sphere::from(
+	scene.push(Box::new(Sphere::from(
 		Point3::from(4.0, 1.0, 0.0),
 		1.0,
 		Rc::new(mat),
 	)));
 
-	entities
+	scene
 }
