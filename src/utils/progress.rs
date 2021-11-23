@@ -22,6 +22,28 @@ impl Progress {
 	}
 }
 
-pub fn calc_height(width: i32, aspect_ratio: f64) -> i32 {
-	(width as f64 / aspect_ratio) as i32
+#[test]
+fn test_calc() {
+	let progress = Progress {
+		curr_height: 5,
+		curr_width: 0,
+		total_height: 10,
+		total_width: 10,
+	}
+	.calc();
+
+	assert_eq!(progress, 51.0);
+}
+
+#[test]
+fn test_curr_pixel() {
+	let progress = Progress {
+		curr_height: 1,
+		curr_width: 2,
+		total_height: 100,
+		total_width: 200,
+	}
+	.curr_pixel();
+
+	assert_eq!(progress, 203);
 }

@@ -22,60 +22,6 @@ mod output;
 mod rendering;
 mod utils;
 
-pub fn render_image(
-	scene: Vec<Box<dyn Hit>>,
-	Settings {
-		aspect_ratio,
-		image_width,
-		image_height,
-		samples_per_pixel,
-		max_depth,
-		file_name,
-		look_from,
-		look_at,
-		aperture,
-		focus_distance,
-		field_of_view,
-	}: Settings,
-) {
-	let cam = Camera::from(CameraProps {
-		look_at,
-		look_from,
-		aspect_ratio,
-		aperture,
-		focus_distance,
-		field_of_view,
-	});
-
-	// Render
-	let mut pixels = vec![];
-	for j in 0..image_height {
-		for i in 0..image_width {
-			Progress {
-				curr_height: j,
-				curr_width: i,
-				total_height: image_height,
-				total_width: image_width,
-			}
-			.print();
-			let pixel_color: Color = (0..samples_per_pixel)
-				.map(|_sample| {
-					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
-					let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
-					let r = cam.calc_ray(u, v);
-					ray_color(&r, &scene, max_depth)
-				})
-				.sum();
-			write_color(&mut pixels, pixel_color, samples_per_pixel);
-		}
-	}
-
-	eprint!("\rWriting to file...");
-	pixels_to_file(&pixels, image_height, image_width, &file_name);
-	eprintln!("\nDone.");
-	io::stderr().flush().unwrap();
-}
-
 pub struct Settings {
 	pub aspect_ratio: f64,
 	pub image_width: i32,
@@ -108,6 +54,59 @@ impl Settings {
 			field_of_view: 20.0,
 		}
 	}
+}
+
+pub fn render_image(
+	scene: Vec<Box<dyn Hit>>,
+	Settings {
+		aspect_ratio,
+		image_width,
+		image_height,
+		samples_per_pixel,
+		max_depth,
+		file_name,
+		look_from,
+		look_at,
+		aperture,
+		focus_distance,
+		field_of_view,
+	}: Settings,
+) {
+	let cam = Camera::from(CameraProps {
+		look_at,
+		look_from,
+		aspect_ratio,
+		aperture,
+		focus_distance,
+		field_of_view,
+	});
+
+	let mut pixels = vec![];
+	for j in 0..image_height {
+		for i in 0..image_width {
+			Progress {
+				curr_height: j,
+				curr_width: i,
+				total_height: image_height,
+				total_width: image_width,
+			}
+			.print();
+			let pixel_color: Color = (0..samples_per_pixel)
+				.map(|_sample| {
+					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
+					let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
+					let r = cam.calc_ray(u, v);
+					ray_color(&r, &scene, max_depth)
+				})
+				.sum();
+			write_color(&mut pixels, pixel_color, samples_per_pixel);
+		}
+	}
+
+	eprint!("\rWriting to file...");
+	pixels_to_file(&pixels, image_height, image_width, &file_name);
+	eprintln!("\nDone.");
+	io::stderr().flush().unwrap();
 }
 
 #[cfg(test)]
