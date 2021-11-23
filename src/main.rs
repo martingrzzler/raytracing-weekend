@@ -1,6 +1,6 @@
-use raytracing_weekend::{run, Settings};
+use raytracing_weekend::{render_image, Settings};
 
 fn main() {
     let settings = Settings::new();
-    run(settings);
+    render_image(settings);
 }

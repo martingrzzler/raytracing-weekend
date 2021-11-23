@@ -18,7 +18,7 @@ mod math;
 mod output;
 mod rendering;
 
-pub fn run(
+pub fn render_image(
 	Settings {
 		aspect_ratio,
 		image_width,
@@ -118,7 +118,7 @@ mod test {
 			max_depth: 50,
 			file_name: "test.ppm".to_string(),
 		};
-		run(settings);
+		render_image(settings);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
