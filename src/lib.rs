@@ -26,6 +26,7 @@ pub fn run(
 		image_height,
 		samples_per_pixel,
 		max_depth,
+		file_name,
 	}: Settings,
 ) {
 	// Entities
@@ -81,6 +82,7 @@ pub struct Settings {
 	pub image_height: i32,
 	pub samples_per_pixel: i32,
 	pub max_depth: i32,
+	pub file_name: String,
 }
 
 impl Settings {
@@ -93,6 +95,7 @@ impl Settings {
 			image_height: calc_height(image_width, aspect_ratio),
 			samples_per_pixel: 50,
 			max_depth: 50,
+			file_name: "default.ppm".to_string(),
 		}
 	}
 }
@@ -116,6 +119,7 @@ mod test {
 			aspect_ratio: 16.0 / 9.0,
 			samples_per_pixel: 1,
 			max_depth: 50,
+			file_name: "test.ppm".to_string(),
 		};
 		run(args, settings);
 
