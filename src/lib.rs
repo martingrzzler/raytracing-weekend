@@ -3,11 +3,11 @@ pub use rendering::random_scene;
 
 use std::io::{self, Write};
 
-use color::{write_color, Color};
+use color::{transform_to_pixel, Color};
 use rendering::ray_color;
 
 use crate::camera::CameraProps;
-use crate::output::pixels_to_file;
+use crate::output::{pixels_to_file, Pixel};
 use crate::rendering::Hit;
 use crate::utils::{calc_height, Progress};
 use crate::{
@@ -71,19 +71,21 @@ impl Renderer {
 			..
 		} = &self.settings;
 
-		let mut pixels = vec![];
-		for j in 0..*image_height {
-			for i in 0..*image_width {
-				Progress {
-					curr_height: j,
-					curr_width: i,
-					total_height: *image_height,
-					total_width: *image_width,
-				}
-				.print();
-				write_color(&mut pixels, self.pixel_color(i, j), *samples_per_pixel);
-			}
-		}
+		let pixels: Vec<Pixel> = (0..*image_height)
+			.into_iter()
+			.flat_map(|j| {
+				(0..*image_width).into_iter().map(move |i| {
+					Progress {
+						curr_height: j,
+						curr_width: i,
+						total_height: *image_height,
+						total_width: *image_width,
+					}
+					.print();
+					transform_to_pixel(self.pixel_color(i, j), *samples_per_pixel)
+				})
+			})
+			.collect();
 
 		eprint!("\rWriting to file...");
 		pixels_to_file(&pixels, *image_height, *image_width, &file_name);
@@ -166,5 +168,20 @@ mod test {
 		renderer.render();
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
+	}
+
+	#[test]
+	fn play_wth_map() {
+		let pixels: Vec<Color> = (0..5)
+			.into_iter()
+			.flat_map(|j| {
+				(0..10)
+					.into_iter()
+					.map(|i| Color::from(i as f64, i as f64, i as f64))
+			})
+			.collect();
+		println!("{:?}", pixels);
+
+		assert_eq!(50, pixels.len())
 	}
 }
