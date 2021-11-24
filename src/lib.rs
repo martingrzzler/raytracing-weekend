@@ -71,17 +71,13 @@ impl Renderer {
 			..
 		} = &self.settings;
 
+		let progress = &Progress::from(*image_height * *image_width);
+
 		let pixels: Vec<Pixel> = (0..*image_height)
 			.into_iter()
 			.flat_map(|j| {
 				(0..*image_width).into_iter().map(move |i| {
-					Progress {
-						curr_height: j,
-						curr_width: i,
-						total_height: *image_height,
-						total_width: *image_width,
-					}
-					.print();
+					progress.print();
 					transform_to_pixel(self.pixel_color(i, j), *samples_per_pixel)
 				})
 			})

@@ -1,49 +1,31 @@
-use std::io::{self, Write};
+use std::{
+	cell::RefCell,
+	io::{self, Write},
+};
 
 pub struct Progress {
-	pub curr_width: i32,
-	pub curr_height: i32,
-	pub total_height: i32,
-	pub total_width: i32,
+	current: RefCell<i32>,
+	total: i32,
 }
 
 impl Progress {
-	fn calc(&self) -> f64 {
-		(self.curr_pixel() as f64 / (self.total_height * self.total_width) as f64) * 100.0
+	pub fn from(total: i32) -> Self {
+		Self {
+			current: RefCell::new(0),
+			total,
+		}
 	}
 
-	fn curr_pixel(&self) -> i32 {
-		self.curr_height * self.total_width + self.curr_width + 1
+	fn calc(&self) -> f64 {
+		(*self.current.borrow() as f64 / self.total as f64) * 100.0
 	}
 
 	pub fn print(&self) {
+		let curr = self.current.as_ptr();
+		unsafe {
+			*curr = *curr + 1;
+		}
 		eprint!("\rProgress: {:.2}%", self.calc());
 		io::stderr().flush().unwrap();
 	}
-}
-
-#[test]
-fn test_calc() {
-	let progress = Progress {
-		curr_height: 5,
-		curr_width: 0,
-		total_height: 10,
-		total_width: 10,
-	}
-	.calc();
-
-	assert_eq!(progress, 51.0);
-}
-
-#[test]
-fn test_curr_pixel() {
-	let progress = Progress {
-		curr_height: 1,
-		curr_width: 2,
-		total_height: 100,
-		total_width: 200,
-	}
-	.curr_pixel();
-
-	assert_eq!(progress, 203);
 }
