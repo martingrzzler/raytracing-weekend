@@ -26,8 +26,8 @@ pub fn ray_color(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	}
 	let unit_dir = norm(r.direction());
 	let t = 0.5 * (unit_dir.y() + 1.0);
-	let res = Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t;
-	res
+
+	Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t
 }
 
 fn trace(r: &Ray, t_min: f64, t_max: f64, scene: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {
