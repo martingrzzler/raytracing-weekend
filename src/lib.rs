@@ -67,7 +67,6 @@ impl Renderer {
 			image_height,
 			image_width,
 			samples_per_pixel,
-			max_depth,
 			file_name,
 			..
 		} = &self.settings;
@@ -82,15 +81,7 @@ impl Renderer {
 					total_width: *image_width,
 				}
 				.print();
-				let pixel_color: Color = (0..*samples_per_pixel)
-					.map(|_sample| {
-						let u = (i as f64 + rand()) / ((*image_width as f64) - 1.0);
-						let v = (j as f64 + rand()) / ((*image_height as f64) - 1.0);
-						let r = self.camera.calc_ray(u, v);
-						ray_color(&r, &self.scene, *max_depth)
-					})
-					.sum();
-				write_color(&mut pixels, pixel_color, *samples_per_pixel);
+				write_color(&mut pixels, self.pixel_color(i, j), *samples_per_pixel);
 			}
 		}
 
@@ -98,6 +89,17 @@ impl Renderer {
 		pixels_to_file(&pixels, *image_height, *image_width, &file_name);
 		eprintln!("\nDone.");
 		io::stderr().flush().unwrap();
+	}
+
+	fn pixel_color(&self, curr_width: i32, curr_height: i32) -> Color {
+		(0..self.settings.samples_per_pixel)
+			.map(|_sample| {
+				let u = (curr_width as f64 + rand()) / ((self.settings.image_width as f64) - 1.0);
+				let v = (curr_height as f64 + rand()) / ((self.settings.image_height as f64) - 1.0);
+				let r = self.camera.calc_ray(u, v);
+				ray_color(&r, &self.scene, self.settings.max_depth)
+			})
+			.sum()
 	}
 }
 

@@ -1,4 +1,4 @@
-use raytracing_weekend::{random_scene, Renderer, Settings};
+use raytracing_weekend::Renderer;
 
 fn main() {
     let renderer = Renderer::new();
