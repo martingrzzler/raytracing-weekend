@@ -22,6 +22,85 @@ mod output;
 mod rendering;
 mod utils;
 
+pub struct Renderer {
+	scene: Vec<Box<dyn Hit>>,
+	camera: Camera,
+	settings: Settings,
+}
+
+impl Renderer {
+	pub fn new() -> Self {
+		let settings = Settings::new();
+		Self {
+			scene: random_scene(),
+			camera: Camera::from(CameraProps {
+				field_of_view: settings.field_of_view,
+				look_at: settings.look_at,
+				look_from: settings.look_from,
+				focus_distance: settings.focus_distance,
+				aperture: settings.aperture,
+				aspect_ratio: settings.aspect_ratio,
+			}),
+			settings,
+		}
+	}
+
+	pub fn from(scene: Vec<Box<dyn Hit>>, settings: Settings) -> Self {
+		let camera = Camera::from(CameraProps {
+			field_of_view: settings.field_of_view,
+			look_at: settings.look_at,
+			look_from: settings.look_from,
+			focus_distance: settings.focus_distance,
+			aperture: settings.aperture,
+			aspect_ratio: settings.aspect_ratio,
+		});
+
+		Self {
+			settings,
+			scene,
+			camera,
+		}
+	}
+
+	pub fn render(&self) {
+		let Settings {
+			image_height,
+			image_width,
+			samples_per_pixel,
+			max_depth,
+			file_name,
+			..
+		} = &self.settings;
+
+		let mut pixels = vec![];
+		for j in 0..*image_height {
+			for i in 0..*image_width {
+				Progress {
+					curr_height: j,
+					curr_width: i,
+					total_height: *image_height,
+					total_width: *image_width,
+				}
+				.print();
+				let pixel_color: Color = (0..*samples_per_pixel)
+					.map(|_sample| {
+						let u = (i as f64 + rand()) / ((*image_width as f64) - 1.0);
+						let v = (j as f64 + rand()) / ((*image_height as f64) - 1.0);
+						let r = self.camera.calc_ray(u, v);
+						ray_color(&r, &self.scene, *max_depth)
+					})
+					.sum();
+				write_color(&mut pixels, pixel_color, *samples_per_pixel);
+			}
+		}
+
+		eprint!("\rWriting to file...");
+		pixels_to_file(&pixels, *image_height, *image_width, &file_name);
+		eprintln!("\nDone.");
+		io::stderr().flush().unwrap();
+	}
+}
+
 pub struct Settings {
 	pub aspect_ratio: f64,
 	pub image_width: i32,
@@ -56,59 +135,6 @@ impl Settings {
 	}
 }
 
-pub fn render_image(
-	scene: Vec<Box<dyn Hit>>,
-	Settings {
-		aspect_ratio,
-		image_width,
-		image_height,
-		samples_per_pixel,
-		max_depth,
-		file_name,
-		look_from,
-		look_at,
-		aperture,
-		focus_distance,
-		field_of_view,
-	}: Settings,
-) {
-	let cam = Camera::from(CameraProps {
-		look_at,
-		look_from,
-		aspect_ratio,
-		aperture,
-		focus_distance,
-		field_of_view,
-	});
-
-	let mut pixels = vec![];
-	for j in 0..image_height {
-		for i in 0..image_width {
-			Progress {
-				curr_height: j,
-				curr_width: i,
-				total_height: image_height,
-				total_width: image_width,
-			}
-			.print();
-			let pixel_color: Color = (0..samples_per_pixel)
-				.map(|_sample| {
-					let u = (i as f64 + rand()) / ((image_width as f64) - 1.0);
-					let v = (j as f64 + rand()) / ((image_height as f64) - 1.0);
-					let r = cam.calc_ray(u, v);
-					ray_color(&r, &scene, max_depth)
-				})
-				.sum();
-			write_color(&mut pixels, pixel_color, samples_per_pixel);
-		}
-	}
-
-	eprint!("\rWriting to file...");
-	pixels_to_file(&pixels, image_height, image_width, &file_name);
-	eprintln!("\nDone.");
-	io::stderr().flush().unwrap();
-}
-
 #[cfg(test)]
 mod test {
 	use super::*;
@@ -134,7 +160,8 @@ mod test {
 		};
 		let scene = random_scene();
 
-		render_image(scene, settings);
+		let renderer = Renderer::from(scene, settings);
+		renderer.render();
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}

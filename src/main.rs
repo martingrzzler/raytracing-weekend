@@ -1,7 +1,6 @@
-use raytracing_weekend::{random_scene, render_image, Settings};
+use raytracing_weekend::{random_scene, Renderer, Settings};
 
 fn main() {
-    let scene = random_scene();
-    let settings = Settings::new();
-    render_image(scene, settings);
+    let renderer = Renderer::new();
+    renderer.render();
 }
