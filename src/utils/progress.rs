@@ -33,3 +33,19 @@ impl Progress {
 		io::stderr().flush().unwrap();
 	}
 }
+
+#[test]
+fn test_increment() {
+	let p = Progress::from(10);
+	p.increment();
+	assert_eq!(*p.current.borrow(), 1);
+}
+
+#[test]
+fn test_calc() {
+	let p = Progress::from(10);
+	p.increment();
+	p.increment();
+
+	assert_eq!(p.calc(), 20.0);
+}
