@@ -20,11 +20,15 @@ impl Progress {
 		(*self.current.borrow() as f64 / self.total as f64) * 100.0
 	}
 
-	pub fn print(&self) {
+	fn increment(&self) {
 		let curr = self.current.as_ptr();
 		unsafe {
 			*curr = *curr + 1;
 		}
+	}
+
+	pub fn print(&self) {
+		self.increment();
 		eprint!("\rProgress: {:.2}%", self.calc());
 		io::stderr().flush().unwrap();
 	}
