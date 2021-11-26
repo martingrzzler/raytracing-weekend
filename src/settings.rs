@@ -52,7 +52,7 @@ impl Settings {
 	}
 
 	pub fn defocus_blur(&self) -> &DefocusBlur {
-		self.defocus_blur()
+		&self.rendering.blur
 	}
 }
 

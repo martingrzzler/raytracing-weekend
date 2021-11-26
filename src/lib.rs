@@ -47,7 +47,7 @@ impl Renderer {
 	}
 
 	pub fn render(&self) {
-		let ray_generator = &*Renderer::get_ray_generator(&self.settings);
+		let ray_generator = &Renderer::get_ray_generator(&self.settings);
 		let progress = &Progress::from(self.settings.height() * self.settings.width());
 		let pixels: Vec<Pixel> = (0..self.settings.height())
 			.into_iter()
@@ -99,7 +99,7 @@ impl Renderer {
 		}
 	}
 
-	fn get_ray_generator(settings: &Settings) -> Box<impl RayGenerator> {
+	fn get_ray_generator(settings: &Settings) -> impl RayGenerator {
 		let CameraSettings {
 			look_at,
 			look_from,
@@ -117,7 +117,7 @@ impl Renderer {
 			&DefocusBlur::ON {
 				aperture,
 				focus_distance,
-			} => Box::new(DefocusBlurGenerator::from(cam, aperture, focus_distance)),
+			} => DefocusBlurGenerator::from(cam, aperture, focus_distance),
 		}
 	}
 }
