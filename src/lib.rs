@@ -1,19 +1,20 @@
 #![allow(non_upper_case_globals)]
+pub use color::Color;
+pub use math::Point3;
 pub use rendering::random_scene;
+pub use rendering::Hit;
+pub use rendering::{Lambertian, Sphere};
+pub use utils::calc_height;
 
 use std::io::{self, Write};
 
-use color::{transform_to_pixel, Color};
+use color::transform_to_pixel;
 use rendering::ray_color;
 
 use crate::camera::CameraProps;
 use crate::output::{pixels_to_file, Pixel};
-use crate::rendering::Hit;
-use crate::utils::{calc_height, Progress};
-use crate::{
-	camera::Camera,
-	math::{rand, Point3},
-};
+use crate::utils::Progress;
+use crate::{camera::Camera, math::rand};
 
 mod camera;
 mod color;
@@ -66,7 +67,6 @@ impl Renderer {
 		let Settings {
 			image_height,
 			image_width,
-			samples_per_pixel,
 			file_name,
 			..
 		} = &self.settings;
@@ -78,7 +78,7 @@ impl Renderer {
 			.flat_map(|j| {
 				(0..*image_width).into_iter().map(move |i| {
 					progress.print();
-					transform_to_pixel(self.pixel_color(i, j), *samples_per_pixel)
+					transform_to_pixel(self.pixel_color(i, j))
 				})
 			})
 			.collect();
@@ -90,15 +90,33 @@ impl Renderer {
 	}
 
 	fn pixel_color(&self, curr_width: i32, curr_height: i32) -> Color {
-		(0..self.settings.samples_per_pixel)
-			.map(|_sample| {
-				let u = (curr_width as f64 + rand()) / ((self.settings.image_width as f64) - 1.0);
-				let v = (curr_height as f64 + rand()) / ((self.settings.image_height as f64) - 1.0);
+		match self.settings.antialiasing {
+			Antialiasing::MSAA => {
+				let color: Color = (0..self.settings.samples_per_pixel)
+					.map(|_sample| {
+						let u = (curr_width as f64 + rand()) / ((self.settings.image_width as f64) - 1.0);
+						let v = (curr_height as f64 + rand()) / ((self.settings.image_height as f64) - 1.0);
+						let r = self.camera.calc_ray(u, v);
+						ray_color(&r, &self.scene, self.settings.max_depth)
+					})
+					.sum();
+
+				let scale = 1.0 / self.settings.samples_per_pixel as f64;
+				color * scale
+			}
+			Antialiasing::NONE => {
+				let u = (curr_width as f64) / ((self.settings.image_width as f64) - 1.0);
+				let v = (curr_height as f64) / ((self.settings.image_height as f64) - 1.0);
 				let r = self.camera.calc_ray(u, v);
 				ray_color(&r, &self.scene, self.settings.max_depth)
-			})
-			.sum()
+			}
+		}
 	}
+}
+
+pub enum Antialiasing {
+	MSAA,
+	NONE,
 }
 
 pub struct Settings {
@@ -113,6 +131,7 @@ pub struct Settings {
 	pub focus_distance: f64,
 	pub aperture: f64,
 	pub field_of_view: f64,
+	pub antialiasing: Antialiasing,
 }
 
 impl Settings {
@@ -131,6 +150,7 @@ impl Settings {
 			focus_distance: 10.0,
 			aperture: 0.1,
 			field_of_view: 20.0,
+			antialiasing: Antialiasing::MSAA,
 		}
 	}
 }
@@ -157,27 +177,13 @@ mod test {
 			focus_distance: 10.0,
 			aperture: 0.1,
 			field_of_view: 20.0,
+			antialiasing: Antialiasing::MSAA,
 		};
 		let scene = random_scene();
 
 		let renderer = Renderer::from(scene, settings);
 		renderer.render();
 
-		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
-	}
-
-	#[test]
-	fn play_wth_map() {
-		let pixels: Vec<Color> = (0..5)
-			.into_iter()
-			.flat_map(|j| {
-				(0..10)
-					.into_iter()
-					.map(|i| Color::from(i as f64, i as f64, i as f64))
-			})
-			.collect();
-		println!("{:?}", pixels);
-
-		assert_eq!(50, pixels.len())
+		// std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
 }

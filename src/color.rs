@@ -5,21 +5,18 @@ use crate::{
 
 pub type Color = Vec3;
 
-pub fn transform_to_pixel(color: Color, samples_per_pixel: i32) -> Pixel {
-	let Color {
-		e: (mut r, mut g, mut b),
-	} = color;
-
-	let scale = 1.0 / samples_per_pixel as f64;
-
-	// sqrt for gamma correction
-	r = (scale * r).sqrt();
-	g = (scale * g).sqrt();
-	b = (scale * b).sqrt();
+pub fn transform_to_pixel(color: Color) -> Pixel {
+	let Color { e: (r, g, b) } = gamma_correct(color);
 
 	Pixel::from(
 		(256.0 * clamp(r, 0.0, 0.999)) as i32,
 		(256.0 * clamp(g, 0.0, 0.999)) as i32,
 		(256.0 * clamp(b, 0.0, 0.999)) as i32,
 	)
+}
+
+pub fn gamma_correct(color: Color) -> Color {
+	Color {
+		e: (color.x().sqrt(), color.y().sqrt(), color.z().sqrt()),
+	}
 }
