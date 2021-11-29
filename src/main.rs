@@ -1,5 +1,5 @@
 use raytracing_weekend::{
-    random_scene, Antialiasing, DefocusBlur, ImageSettings, RenderSettings, Renderer, Settings,
+    random_scene, DefocusBlur, ImageSettings, RenderSettings, Renderer, Settings,
 };
 
 fn main() {

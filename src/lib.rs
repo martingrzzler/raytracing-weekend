@@ -137,15 +137,53 @@ impl Renderer {
 mod test {
 	use super::*;
 
-	// #[test]
-	// fn test_render_image_creates_image() {
-	// 	let file_name = "test.ppm";
+	#[test]
+	fn test_render_image_creates_image() {
+		let file_name = "test.ppm";
 
-	// 	let scene = random_scene();
+		let scene = random_scene();
+		let settings = Settings {
+			image: ImageSettings {
+				width: 150,
+				height: 100,
+			},
+			rendering: RenderSettings {
+				antialiasing: Antialiasing::NONE,
+				..Default::default()
+			},
+			file_name: file_name.to_string(),
+			..Default::default()
+		};
 
-	// 	let renderer = Renderer::from(scene, settings);
-	// 	renderer.render();
+		let renderer = Renderer::from(scene, settings);
+		renderer.render();
 
-	// 	std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
-	// }
+		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
+	}
+
+	#[test]
+	fn test_viewport_coordinates() {
+		let file_name = "test.ppm";
+		let width = 100;
+		let height = 50;
+
+		let scene = random_scene();
+		let settings = Settings {
+			rendering: RenderSettings {
+				antialiasing: Antialiasing::NONE,
+				..Default::default()
+			},
+			image: ImageSettings { width, height },
+			file_name: file_name.to_string(),
+			..Default::default()
+		};
+
+		let renderer = Renderer::from(scene, settings);
+
+		let s_t = renderer.calc_viewport_coordinates(0, 0, &|| 0.0);
+		assert_eq!(s_t, (0.0, 0.0));
+
+		let s_t = renderer.calc_viewport_coordinates(width - 1, height - 1, &|| 0.0);
+		assert_eq!(s_t, (1.0, 1.0));
+	}
 }
