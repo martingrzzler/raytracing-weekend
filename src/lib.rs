@@ -6,7 +6,9 @@ pub use math::Point3;
 pub use rendering::random_scene;
 pub use rendering::Hit;
 pub use rendering::{Lambertian, Sphere};
-pub use settings::{Antialiasing, CameraSettings, DefocusBlur, ImageSettings, Settings};
+pub use settings::{
+	Antialiasing, CameraSettings, DefocusBlur, ImageSettings, RenderSettings, Settings,
+};
 pub use utils::{aspect_ratio, calc_height};
 
 use std::io::{self, Write};

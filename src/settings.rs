@@ -56,28 +56,46 @@ impl Settings {
 	}
 }
 
+impl Default for RenderSettings {
+	fn default() -> Self {
+		Self {
+			max_depth: 50,
+			antialiasing: Antialiasing::MSAA {
+				samples_per_pixel: 50,
+			},
+			blur: DefocusBlur::ON {
+				focus_distance: 10.0,
+				aperture: 0.1,
+			},
+		}
+	}
+}
+
+impl Default for CameraSettings {
+	fn default() -> Self {
+		Self {
+			look_at: Point3::from(0.0, 0.0, 0.0),
+			look_from: Point3::from(13.0, 2.0, 3.0),
+			field_of_view: 20.0,
+		}
+	}
+}
+
+impl Default for ImageSettings {
+	fn default() -> Self {
+		Self {
+			width: 720,
+			height: 576,
+		}
+	}
+}
+
 impl Default for Settings {
 	fn default() -> Self {
 		Self {
-			rendering: RenderSettings {
-				max_depth: 50,
-				antialiasing: Antialiasing::MSAA {
-					samples_per_pixel: 50,
-				},
-				blur: DefocusBlur::ON {
-					focus_distance: 10.0,
-					aperture: 0.1,
-				},
-			},
-			camera: CameraSettings {
-				look_at: Point3::from(0.0, 0.0, 0.0),
-				look_from: Point3::from(13.0, 2.0, 3.0),
-				field_of_view: 20.0,
-			},
-			image: ImageSettings {
-				width: 720,
-				height: 576,
-			},
+			rendering: Default::default(),
+			camera: Default::default(),
+			image: Default::default(),
 			file_name: "default.ppm".to_string(),
 		}
 	}
