@@ -33,30 +33,36 @@ mod utils;
 pub struct Renderer {
 	scene: Vec<Box<dyn Hit>>,
 	settings: Settings,
+	ray_generator: Box<dyn RayGenerator>,
 }
 
 impl Renderer {
 	pub fn new() -> Self {
-		let settings = Default::default();
+		let settings: Settings = Default::default();
+		let ray_generator = Renderer::get_ray_generator(&settings);
 		Self {
 			scene: random_scene(),
 			settings,
+			ray_generator,
 		}
 	}
 
 	pub fn from(scene: Vec<Box<dyn Hit>>, settings: Settings) -> Self {
-		Self { settings, scene }
+		Self {
+			scene,
+			ray_generator: Renderer::get_ray_generator(&settings),
+			settings,
+		}
 	}
 
 	pub fn render(&self) {
-		let ray_generator = &*Renderer::get_ray_generator(&self.settings);
 		let progress = &Progress::from(self.settings.height() * self.settings.width());
 		let pixels: Vec<Pixel> = (0..self.settings.height())
 			.into_iter()
 			.flat_map(|j| {
 				(0..self.settings.width()).into_iter().map(move |i| {
 					progress.print();
-					transform_to_pixel(self.pixel_color(ray_generator, i, j))
+					transform_to_pixel(self.pixel_color(i, j))
 				})
 			})
 			.collect();
@@ -72,18 +78,13 @@ impl Renderer {
 		io::stderr().flush().unwrap();
 	}
 
-	fn pixel_color(
-		&self,
-		ray_generator: &dyn RayGenerator,
-		curr_width: i32,
-		curr_height: i32,
-	) -> Color {
+	fn pixel_color(&self, curr_width: i32, curr_height: i32) -> Color {
 		match self.settings.antialiasing() {
 			Antialiasing::MSAA { samples_per_pixel } => {
 				let color: Color = (0..*samples_per_pixel)
 					.map(|_sample| {
 						let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &rand);
-						let r = ray_generator.gen_ray(s, t);
+						let r = self.ray_generator.gen_ray(s, t);
 						trace(&r, &self.scene, self.settings.max_depth())
 					})
 					.sum();
@@ -92,7 +93,7 @@ impl Renderer {
 			}
 			Antialiasing::NONE => {
 				let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &|| 0.5);
-				let r = ray_generator.gen_ray(s, t);
+				let r = self.ray_generator.gen_ray(s, t);
 				trace(&r, &self.scene, self.settings.max_depth())
 			}
 		}
