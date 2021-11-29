@@ -117,7 +117,30 @@ pub struct PlainGenerator {
 	vertical: Vec3,
 }
 
-pub trait RayGenerator: Sized {
+impl PlainGenerator {
+	pub fn from(cam: Camera) -> Self {
+		let (u, v, w) = cam.coord_system();
+		let horizontal = cam.viewport_width() * u;
+		let vertical = cam.viewport_height() * v;
+		Self {
+			upper_left_corner: cam.origin() - &horizontal / 2.0 + &vertical / 2.0 - w,
+			vertical,
+			horizontal,
+			cam,
+		}
+	}
+}
+
+impl RayGenerator for PlainGenerator {
+	fn gen_ray(&self, s: f64, t: f64) -> Ray {
+		let ray_dir =
+			&self.upper_left_corner + &self.horizontal * s - &self.vertical * t - self.cam.origin();
+
+		Ray::from(self.cam.origin(), &ray_dir)
+	}
+}
+
+pub trait RayGenerator {
 	fn gen_ray(&self, s: f64, t: f64) -> Ray;
 }
 

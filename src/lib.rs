@@ -1,4 +1,5 @@
 #![allow(non_upper_case_globals)]
+use camera::PlainGenerator;
 use camera::RayGenerator;
 pub use color::Color;
 pub use math::Point3;
@@ -8,7 +9,6 @@ pub use rendering::{Lambertian, Sphere};
 pub use settings::{Antialiasing, CameraSettings, DefocusBlur, ImageSettings, Settings};
 pub use utils::{aspect_ratio, calc_height};
 
-use core::panic;
 use std::io::{self, Write};
 
 use color::transform_to_pixel;
@@ -47,7 +47,7 @@ impl Renderer {
 	}
 
 	pub fn render(&self) {
-		let ray_generator = &Renderer::get_ray_generator(&self.settings);
+		let ray_generator = &*Renderer::get_ray_generator(&self.settings);
 		let progress = &Progress::from(self.settings.height() * self.settings.width());
 		let pixels: Vec<Pixel> = (0..self.settings.height())
 			.into_iter()
@@ -72,7 +72,7 @@ impl Renderer {
 
 	fn pixel_color(
 		&self,
-		ray_generator: &impl RayGenerator,
+		ray_generator: &dyn RayGenerator,
 		curr_width: i32,
 		curr_height: i32,
 	) -> Color {
@@ -99,7 +99,7 @@ impl Renderer {
 		}
 	}
 
-	fn get_ray_generator(settings: &Settings) -> impl RayGenerator {
+	fn get_ray_generator(settings: &Settings) -> Box<dyn RayGenerator> {
 		let CameraSettings {
 			look_at,
 			look_from,
@@ -113,11 +113,11 @@ impl Renderer {
 		});
 
 		match settings.defocus_blur() {
-			&DefocusBlur::OFF => panic!("Not implemented"),
+			&DefocusBlur::OFF => Box::new(PlainGenerator::from(cam)),
 			&DefocusBlur::ON {
 				aperture,
 				focus_distance,
-			} => DefocusBlurGenerator::from(cam, aperture, focus_distance),
+			} => Box::new(DefocusBlurGenerator::from(cam, aperture, focus_distance)),
 		}
 	}
 }
