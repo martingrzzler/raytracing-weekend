@@ -13,14 +13,14 @@ mod entity;
 mod material;
 pub mod ray;
 
-pub fn ray_color(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
+pub fn trace(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	if depth <= 0 {
 		return Color::new();
 	}
-	let opt = trace(&r, 0.001, INFINITY, scene);
+	let opt = intersect(&r, 0.001, INFINITY, scene);
 	if let Some(rec) = opt {
 		if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
-			return attenuation * ray_color(&scattered, scene, depth - 1);
+			return attenuation * trace(&scattered, scene, depth - 1);
 		}
 		return Color::new();
 	}
@@ -30,7 +30,7 @@ pub fn ray_color(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
 	Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t
 }
 
-fn trace(r: &Ray, t_min: f64, t_max: f64, scene: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {
+fn intersect(r: &Ray, t_min: f64, t_max: f64, scene: &Vec<Box<dyn Hit>>) -> Option<HitRecord> {
 	let mut closest = t_max;
 	let mut rec: Option<HitRecord> = None;
 	for e in scene.iter() {

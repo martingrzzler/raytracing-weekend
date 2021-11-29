@@ -14,7 +14,7 @@ pub use utils::{aspect_ratio, calc_height};
 use std::io::{self, Write};
 
 use color::transform_to_pixel;
-use rendering::ray_color;
+use rendering::trace;
 
 use crate::camera::DefocusBlurGenerator;
 use crate::output::{pixels_to_file, Pixel};
@@ -82,23 +82,31 @@ impl Renderer {
 			Antialiasing::MSAA { samples_per_pixel } => {
 				let color: Color = (0..*samples_per_pixel)
 					.map(|_sample| {
-						let s = (curr_width as f64 + rand()) / ((self.settings.width() as f64) - 1.0);
-						let t = (curr_height as f64 + rand()) / ((self.settings.height() as f64) - 1.0);
+						let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &rand);
 						let r = ray_generator.gen_ray(s, t);
-						ray_color(&r, &self.scene, self.settings.max_depth())
+						trace(&r, &self.scene, self.settings.max_depth())
 					})
 					.sum();
 
-				let scale = 1.0 / *samples_per_pixel as f64;
-				color * scale
+				color / *samples_per_pixel as f64
 			}
 			Antialiasing::NONE => {
-				let s = (curr_width as f64) / ((self.settings.width() as f64) - 1.0);
-				let t = (curr_height as f64) / ((self.settings.height() as f64) - 1.0);
+				let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &|| 0.5);
 				let r = ray_generator.gen_ray(s, t);
-				ray_color(&r, &self.scene, self.settings.max_depth())
+				trace(&r, &self.scene, self.settings.max_depth())
 			}
 		}
+	}
+
+	fn calc_viewport_coordinates(
+		&self,
+		curr_width: i32,
+		curr_height: i32,
+		deviation: &dyn Fn() -> f64,
+	) -> (f64, f64) {
+		let s: f64 = (curr_width as f64 + deviation()) / ((self.settings.width() as f64) - 1.0);
+		let t: f64 = (curr_height as f64 + deviation()) / ((self.settings.height() as f64) - 1.0);
+		(s, t)
 	}
 
 	fn get_ray_generator(settings: &Settings) -> Box<dyn RayGenerator> {
@@ -124,21 +132,19 @@ impl Renderer {
 	}
 }
 
-// #[cfg(test)]
-// mod test {
-// 	use super::*;
+#[cfg(test)]
+mod test {
+	use super::*;
 
-// 	#[test]
-// 	fn test_render_image_creates_image() {
-// 		let image_width = 100;
-// 		let aspect_ratio = 16.0 / 9.0;
-// 		let file_name = "test.ppm";
+	// #[test]
+	// fn test_render_image_creates_image() {
+	// 	let file_name = "test.ppm";
 
-// 		let scene = random_scene();
+	// 	let scene = random_scene();
 
-// 		let renderer = Renderer::from(scene, settings);
-// 		renderer.render();
+	// 	let renderer = Renderer::from(scene, settings);
+	// 	renderer.render();
 
-// 		// std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
-// 	}
-// }
+	// 	std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
+	// }
+}
