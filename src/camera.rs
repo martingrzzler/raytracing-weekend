@@ -1,9 +1,6 @@
 #![allow(dead_code)]
 
-use crate::{
-	math::{cross, norm, radians, Point3, Vec3},
-	rendering::Ray,
-};
+use crate::math::{cross, norm, radians, Point3, Ray, Vec3};
 
 pub struct CameraParams {
 	pub look_from: Point3,

@@ -1,10 +1,12 @@
 #![allow(dead_code)]
+pub use ray::Ray;
 pub use std::f64::consts::PI;
 pub use std::f64::INFINITY;
-pub use vec3::{cross, dot, norm, refract, Point3, Vec3};
+pub use vec3::{cross, dot, norm, reflect, refract, Point3, Vec3};
 
 use rand_distr::{Distribution, Uniform};
 
+pub mod ray;
 pub mod vec3;
 
 pub fn radians(degrees: f64) -> f64 {

@@ -1,11 +1,11 @@
 #![allow(non_upper_case_globals)]
 use camera::PlainGenerator;
 use camera::RayGenerator;
-pub use math::Point3;
 use math::Vec3;
-pub use rendering::Hit;
-pub use rendering::{Dielectric, Lambertian, Material, Metal, Sphere};
+pub use math::{Point3, Ray};
+pub use scene::Hit;
 pub use scene::Scene;
+pub use scene::{Dielectric, Lambertian, Material, Metal, Sphere};
 pub use settings::{
 	Antialiasing, CameraSettings, DefocusBlur, ImageSettings, RenderSettings, Settings,
 };
@@ -18,14 +18,12 @@ use crate::pixel::Pixel;
 use crate::utils::ProgressBar;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
-use rendering::Ray;
 
 use crate::math::{norm, INFINITY};
 
 mod camera;
 mod math;
 mod pixel;
-mod rendering;
 mod scene;
 mod settings;
 mod utils;

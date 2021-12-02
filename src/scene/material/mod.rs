@@ -1,7 +1,7 @@
-use crate::rendering::ray::Ray;
+use super::HitRecord;
+use crate::math::Ray;
 use crate::Color;
 
-use super::HitRecord;
 pub use dielectric::Dielectric;
 pub use lambertian::Lambertian;
 pub use metal::Metal;

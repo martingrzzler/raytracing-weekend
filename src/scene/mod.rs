@@ -1,12 +1,16 @@
+use crate::math::Ray;
+pub use entity::hit::*;
+pub use entity::sphere::*;
+pub use material::{Dielectric, Lambertian, Material, Metal};
 use std::rc::Rc;
+
+mod entity;
+mod material;
 
 use crate::math::rand;
 use crate::math::Point3;
-use crate::rendering::{HitRecord, Ray};
 use crate::Color;
-use crate::Hit;
 
-pub use crate::{Dielectric, Lambertian, Material, Metal, Sphere};
 pub type Entity = Box<dyn Hit>;
 
 pub struct Scene {

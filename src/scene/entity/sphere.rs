@@ -2,8 +2,8 @@
 
 use std::rc::Rc;
 
-use crate::math::{dot, Point3};
-use crate::rendering::{Hit, HitRecord, Lambertian, Material, Ray};
+use crate::math::{dot, Point3, Ray};
+use crate::scene::{Hit, HitRecord, Lambertian, Material};
 
 pub struct Sphere {
 	center: Point3,

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use crate::math::{dot, Point3, Vec3};
-use crate::rendering::{Material, Ray};
+use crate::math::{dot, Point3, Ray, Vec3};
+use crate::scene::Material;
 
 pub struct HitRecord {
 	p: Point3,

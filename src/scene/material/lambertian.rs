@@ -1,10 +1,7 @@
-use crate::{
-	math::Vec3,
-	rendering::{HitRecord, Ray},
-	Color,
-};
-
+use super::HitRecord;
 use super::Material;
+use crate::math::{Ray, Vec3};
+use crate::Color;
 
 pub struct Lambertian {
 	albedo: Color,

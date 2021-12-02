@@ -1,7 +1,7 @@
 #![allow(dead_code)]
+use super::HitRecord;
 use crate::{
-	math::vec3::{dot, reflect, Vec3},
-	rendering::{HitRecord, Ray},
+	math::{dot, reflect, Ray, Vec3},
 	Color,
 };
 
