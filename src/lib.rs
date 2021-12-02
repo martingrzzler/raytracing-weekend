@@ -9,7 +9,9 @@ pub use rendering::{Lambertian, Sphere};
 pub use settings::{
 	Antialiasing, CameraSettings, DefocusBlur, ImageSettings, RenderSettings, Settings,
 };
+
 pub use utils::{aspect_ratio, calc_height};
+pub use writer::{PPMWriter, WriteResult};
 
 use std::io::{self, Write};
 
@@ -29,11 +31,18 @@ mod output;
 mod rendering;
 mod settings;
 mod utils;
+mod writer;
 
 pub struct Renderer {
 	scene: Vec<Box<dyn Hit>>,
 	settings: Settings,
 	ray_generator: Box<dyn RayGenerator>,
+}
+
+pub struct RenderingResult {
+	pub width: i32,
+	pub height: i32,
+	pub pixels: Vec<Pixel>,
 }
 
 impl Renderer {
@@ -55,7 +64,7 @@ impl Renderer {
 		}
 	}
 
-	pub fn render(&self) {
+	pub fn render(&self) -> RenderingResult {
 		let progress = &Progress::from(self.settings.height() * self.settings.width());
 		let pixels: Vec<Pixel> = (0..self.settings.height())
 			.into_iter()
@@ -67,15 +76,11 @@ impl Renderer {
 			})
 			.collect();
 
-		eprint!("\rWriting to file...");
-		pixels_to_file(
-			&pixels,
-			self.settings.height(),
-			self.settings.width(),
-			&self.settings.file_name,
-		);
-		eprintln!("\nDone.");
-		io::stderr().flush().unwrap();
+		RenderingResult {
+			width: self.settings.width(),
+			height: self.settings.height(),
+			pixels,
+		}
 	}
 
 	fn pixel_color(&self, curr_width: i32, curr_height: i32) -> Color {
@@ -135,6 +140,7 @@ impl Renderer {
 
 #[cfg(test)]
 mod test {
+
 	use super::*;
 
 	#[test]
@@ -154,10 +160,10 @@ mod test {
 			file_name: file_name.to_string(),
 			..Default::default()
 		};
-		let writer = PPMWriter::new("test.ppm");
+		let writer = PPMWriter::new("./assets/test.ppm");
 		let renderer = Renderer::from(scene, settings);
 		let result = renderer.render();
-		writer.write(result);
+		writer.write(result).expect("Failed writing file");
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}
