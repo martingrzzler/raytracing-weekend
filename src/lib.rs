@@ -13,13 +13,14 @@ pub use settings::{
 pub use utils::{aspect_ratio, calc_height};
 pub use writer::{PPMWriter, WriteResult};
 
-use rendering::trace;
-
 use crate::camera::DefocusBlurGenerator;
 use crate::pixel::Pixel;
 use crate::utils::ProgressBar;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
+use rendering::{intersect, Ray};
+
+use crate::math::{norm, INFINITY};
 
 mod camera;
 mod math;
@@ -88,7 +89,7 @@ impl Renderer {
 					.map(|_sample| {
 						let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &rand);
 						let r = self.ray_generator.gen_ray(s, t);
-						trace(&r, &self.scene, self.settings.max_depth())
+						Renderer::trace(&r, &self.scene, self.settings.max_depth())
 					})
 					.sum();
 
@@ -97,7 +98,7 @@ impl Renderer {
 			Antialiasing::NONE => {
 				let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &|| 0.5);
 				let r = self.ray_generator.gen_ray(s, t);
-				trace(&r, &self.scene, self.settings.max_depth())
+				Renderer::trace(&r, &self.scene, self.settings.max_depth())
 			}
 		}
 	}
@@ -133,6 +134,23 @@ impl Renderer {
 				focus_distance,
 			} => Box::new(DefocusBlurGenerator::from(cam, aperture, focus_distance)),
 		}
+	}
+
+	fn trace(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
+		if depth <= 0 {
+			return Color::new();
+		}
+		let opt = intersect(&r, 0.001, INFINITY, scene);
+		if let Some(rec) = opt {
+			if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
+				return attenuation * Renderer::trace(&scattered, scene, depth - 1);
+			}
+			return Color::new();
+		}
+		let unit_dir = norm(r.direction());
+		let t = 0.5 * (unit_dir.y() + 1.0);
+
+		Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t
 	}
 }
 
