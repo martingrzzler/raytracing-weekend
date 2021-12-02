@@ -1,7 +1,3 @@
-use std::fmt::Write;
-use std::fs::File;
-use std::io::Write as IoWrite;
-
 #[derive(Copy, Clone)]
 pub struct Pixel {
 	r: i32,
@@ -26,17 +22,4 @@ impl Pixel {
 	pub fn b(&self) -> i32 {
 		self.b
 	}
-}
-
-pub fn pixels_to_file(pixels: &[Pixel], image_height: i32, image_width: i32, file_name: &str) {
-	let path = format!("./assets/{}", file_name);
-	let mut file = File::create(path).expect("File creation failed");
-	let mut out = format!("P3\n{} {}\n255\n", image_width, image_height);
-	for p in pixels.iter() {
-		writeln!(out, "{} {} {}", p.r(), p.g(), p.b()).expect("Failed to write Pixel");
-	}
-
-	file
-		.write_all(out.as_bytes())
-		.expect("Failed while writing to file");
 }

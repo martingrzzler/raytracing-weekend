@@ -13,13 +13,11 @@ pub use settings::{
 pub use utils::{aspect_ratio, calc_height};
 pub use writer::{PPMWriter, WriteResult};
 
-use std::io::{self, Write};
-
 use color::transform_to_pixel;
 use rendering::trace;
 
 use crate::camera::DefocusBlurGenerator;
-use crate::output::{pixels_to_file, Pixel};
+use crate::output::Pixel;
 use crate::utils::Progress;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
