@@ -1,6 +1,7 @@
 use crate::math::Ray;
 pub use entity::hit::*;
 pub use entity::sphere::*;
+pub use entity::Entity;
 pub use material::{Dielectric, Lambertian, Material, Metal};
 use std::rc::Rc;
 
@@ -10,8 +11,6 @@ mod material;
 use crate::math::rand;
 use crate::math::Point3;
 use crate::Color;
-
-pub type Entity = Box<dyn Hit>;
 
 pub struct Scene {
 	entities: Vec<Entity>,
