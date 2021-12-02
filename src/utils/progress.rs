@@ -3,12 +3,12 @@ use std::{
 	io::{self, Write},
 };
 
-pub struct Progress {
+pub struct ProgressBar {
 	current: RefCell<i32>,
 	total: i32,
 }
 
-impl Progress {
+impl ProgressBar {
 	pub fn from(total: i32) -> Self {
 		Self {
 			current: RefCell::new(0),
@@ -27,23 +27,23 @@ impl Progress {
 		}
 	}
 
-	pub fn print(&self) {
+	pub fn inc(&self) {
 		self.increment();
-		eprint!("\rProgress: {:.2}%", self.calc());
+		eprint!("\rProgressBar: {:.2}%", self.calc());
 		io::stderr().flush().unwrap();
 	}
 }
 
 #[test]
 fn test_increment() {
-	let p = Progress::from(10);
+	let p = ProgressBar::from(10);
 	p.increment();
 	assert_eq!(*p.current.borrow(), 1);
 }
 
 #[test]
 fn test_calc() {
-	let p = Progress::from(10);
+	let p = ProgressBar::from(10);
 	p.increment();
 	p.increment();
 

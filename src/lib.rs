@@ -18,7 +18,7 @@ use rendering::trace;
 
 use crate::camera::DefocusBlurGenerator;
 use crate::output::Pixel;
-use crate::utils::Progress;
+use crate::utils::ProgressBar;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
 
@@ -63,12 +63,12 @@ impl Renderer {
 	}
 
 	pub fn render(&self) -> RenderingResult {
-		let progress = &Progress::from(self.settings.height() * self.settings.width());
+		let progress = &ProgressBar::from(self.settings.height() * self.settings.width());
 		let pixels: Vec<Pixel> = (0..self.settings.height())
 			.into_iter()
 			.flat_map(|j| {
 				(0..self.settings.width()).into_iter().map(move |i| {
-					progress.print();
+					progress.inc();
 					transform_to_pixel(self.pixel_color(i, j))
 				})
 			})

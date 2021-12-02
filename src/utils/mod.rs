@@ -1,4 +1,4 @@
-pub use progress::Progress;
+pub use progress::ProgressBar;
 
 pub mod progress;
 
