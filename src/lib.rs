@@ -143,7 +143,7 @@ mod test {
 
 	#[test]
 	fn test_render_image_creates_image() {
-		let file_name = "test.ppm";
+		let path = "./assets/test.ppm";
 
 		let scene = random_scene();
 		let settings = Settings {
@@ -155,20 +155,18 @@ mod test {
 				antialiasing: Antialiasing::NONE,
 				..Default::default()
 			},
-			file_name: file_name.to_string(),
 			..Default::default()
 		};
-		let writer = PPMWriter::new("./assets/test.ppm");
+		let writer = PPMWriter::new(path);
 		let renderer = Renderer::from(scene, settings);
 		let result = renderer.render();
 		writer.write(result).expect("Failed writing file");
 
-		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
+		std::fs::remove_file(path).expect("File could not be deleted");
 	}
 
 	#[test]
 	fn test_viewport_coordinates() {
-		let file_name = "test.ppm";
 		let width = 100;
 		let height = 50;
 
@@ -179,7 +177,6 @@ mod test {
 				..Default::default()
 			},
 			image: ImageSettings { width, height },
-			file_name: file_name.to_string(),
 			..Default::default()
 		};
 

@@ -31,7 +31,6 @@ pub struct Settings {
 	pub rendering: RenderSettings,
 	pub camera: CameraSettings,
 	pub image: ImageSettings,
-	pub file_name: String,
 }
 
 impl Settings {
@@ -96,7 +95,6 @@ impl Default for Settings {
 			rendering: Default::default(),
 			camera: Default::default(),
 			image: Default::default(),
-			file_name: "default.ppm".to_string(),
 		}
 	}
 }

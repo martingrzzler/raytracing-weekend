@@ -1,5 +1,6 @@
 use raytracing_weekend::{
-    random_scene, DefocusBlur, ImageSettings, RenderSettings, Renderer, Settings,
+    random_scene, DefocusBlur, ImageSettings, PPMWriter, RenderSettings, Renderer, Settings,
+    WriteResult,
 };
 
 fn main() {
@@ -16,5 +17,8 @@ fn main() {
     };
 
     let renderer = Renderer::from(random_scene(), settings);
-    renderer.render();
+    let result = renderer.render();
+
+    let writer = PPMWriter::new("./assets/default.ppm");
+    writer.write(result).expect("Failed writing file");
 }
