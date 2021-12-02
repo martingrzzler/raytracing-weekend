@@ -2,13 +2,13 @@
 use rand_distr::num_traits::Pow;
 
 use super::Material;
-use crate::color::Color;
 use crate::math::dot;
 use crate::math::norm;
 use crate::math::rand;
 use crate::math::refract;
 use crate::math::vec3::reflect;
 use crate::rendering::{HitRecord, Ray};
+use crate::Color;
 
 pub struct Dielectric {
 	refraction_index: f64,

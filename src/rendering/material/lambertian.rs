@@ -1,7 +1,7 @@
 use crate::{
-	color::Color,
 	math::Vec3,
 	rendering::{HitRecord, Ray},
+	Color,
 };
 
 use super::Material;

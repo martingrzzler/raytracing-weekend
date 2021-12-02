@@ -1,8 +1,8 @@
 #![allow(non_upper_case_globals)]
 use camera::PlainGenerator;
 use camera::RayGenerator;
-pub use color::Color;
 pub use math::Point3;
+use math::Vec3;
 pub use rendering::random_scene;
 pub use rendering::Hit;
 pub use rendering::{Lambertian, Sphere};
@@ -13,23 +13,23 @@ pub use settings::{
 pub use utils::{aspect_ratio, calc_height};
 pub use writer::{PPMWriter, WriteResult};
 
-use color::transform_to_pixel;
 use rendering::trace;
 
 use crate::camera::DefocusBlurGenerator;
-use crate::output::Pixel;
+use crate::pixel::Pixel;
 use crate::utils::ProgressBar;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
 
 mod camera;
-mod color;
 mod math;
-mod output;
+mod pixel;
 mod rendering;
 mod settings;
 mod utils;
 mod writer;
+
+pub type Color = Vec3;
 
 pub struct Renderer {
 	scene: Vec<Box<dyn Hit>>,
@@ -69,7 +69,7 @@ impl Renderer {
 			.flat_map(|j| {
 				(0..self.settings.width()).into_iter().map(move |i| {
 					progress.inc();
-					transform_to_pixel(self.pixel_color(i, j))
+					Pixel::from_color(self.pixel_color(i, j))
 				})
 			})
 			.collect();

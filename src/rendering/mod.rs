@@ -5,9 +5,9 @@ pub use entity::sphere::*;
 pub use material::{Dielectric, Lambertian, Material, Metal};
 pub use ray::Ray;
 
-use crate::color::Color;
 use crate::math::rand;
 use crate::math::{norm, Point3, INFINITY};
+use crate::Color;
 
 mod entity;
 mod material;

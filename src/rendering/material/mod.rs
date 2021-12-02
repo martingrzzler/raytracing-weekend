@@ -1,5 +1,5 @@
-use crate::color::Color;
 use crate::rendering::ray::Ray;
+use crate::Color;
 
 use super::HitRecord;
 pub use dielectric::Dielectric;

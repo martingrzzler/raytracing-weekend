@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 use crate::{
-	color::Color,
 	math::vec3::{dot, reflect, Vec3},
 	rendering::{HitRecord, Ray},
+	Color,
 };
 
 use super::Material;
