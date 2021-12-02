@@ -3,9 +3,9 @@ use camera::PlainGenerator;
 use camera::RayGenerator;
 pub use math::Point3;
 use math::Vec3;
-pub use rendering::random_scene;
 pub use rendering::Hit;
-pub use rendering::{Lambertian, Sphere};
+pub use rendering::{Dielectric, Lambertian, Material, Metal, Sphere};
+pub use scene::Scene;
 pub use settings::{
 	Antialiasing, CameraSettings, DefocusBlur, ImageSettings, RenderSettings, Settings,
 };
@@ -18,7 +18,7 @@ use crate::pixel::Pixel;
 use crate::utils::ProgressBar;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
-use rendering::{intersect, Ray};
+use rendering::Ray;
 
 use crate::math::{norm, INFINITY};
 
@@ -26,6 +26,7 @@ mod camera;
 mod math;
 mod pixel;
 mod rendering;
+mod scene;
 mod settings;
 mod utils;
 mod writer;
@@ -33,7 +34,7 @@ mod writer;
 pub type Color = Vec3;
 
 pub struct Renderer {
-	scene: Vec<Box<dyn Hit>>,
+	scene: Scene,
 	settings: Settings,
 	ray_generator: Box<dyn RayGenerator>,
 }
@@ -49,13 +50,13 @@ impl Renderer {
 		let settings: Settings = Default::default();
 		let ray_generator = Renderer::get_ray_generator(&settings);
 		Self {
-			scene: random_scene(),
+			scene: Scene::random(),
 			settings,
 			ray_generator,
 		}
 	}
 
-	pub fn from(scene: Vec<Box<dyn Hit>>, settings: Settings) -> Self {
+	pub fn from(scene: Scene, settings: Settings) -> Self {
 		Self {
 			scene,
 			ray_generator: Renderer::get_ray_generator(&settings),
@@ -89,7 +90,7 @@ impl Renderer {
 					.map(|_sample| {
 						let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &rand);
 						let r = self.ray_generator.gen_ray(s, t);
-						Renderer::trace(&r, &self.scene, self.settings.max_depth())
+						self.trace(&r, self.settings.max_depth())
 					})
 					.sum();
 
@@ -98,7 +99,7 @@ impl Renderer {
 			Antialiasing::NONE => {
 				let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &|| 0.5);
 				let r = self.ray_generator.gen_ray(s, t);
-				Renderer::trace(&r, &self.scene, self.settings.max_depth())
+				self.trace(&r, self.settings.max_depth())
 			}
 		}
 	}
@@ -136,14 +137,14 @@ impl Renderer {
 		}
 	}
 
-	fn trace(r: &Ray, scene: &Vec<Box<dyn Hit>>, depth: i32) -> Color {
+	fn trace(&self, r: &Ray, depth: i32) -> Color {
 		if depth <= 0 {
 			return Color::new();
 		}
-		let opt = intersect(&r, 0.001, INFINITY, scene);
+		let opt = self.scene.intersect(&r, 0.001, INFINITY);
 		if let Some(rec) = opt {
 			if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
-				return attenuation * Renderer::trace(&scattered, scene, depth - 1);
+				return attenuation * self.trace(&scattered, depth - 1);
 			}
 			return Color::new();
 		}
@@ -163,7 +164,7 @@ mod test {
 	fn test_render_image_creates_image() {
 		let path = "./assets/test.ppm";
 
-		let scene = random_scene();
+		let scene = Scene::random();
 		let settings = Settings {
 			image: ImageSettings {
 				width: 150,
@@ -188,7 +189,7 @@ mod test {
 		let width = 100;
 		let height = 50;
 
-		let scene = random_scene();
+		let scene = Scene::random();
 		let settings = Settings {
 			rendering: RenderSettings {
 				antialiasing: Antialiasing::NONE,
