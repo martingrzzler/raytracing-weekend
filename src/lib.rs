@@ -154,9 +154,10 @@ mod test {
 			file_name: file_name.to_string(),
 			..Default::default()
 		};
-
+		let writer = PPMWriter::new("test.ppm");
 		let renderer = Renderer::from(scene, settings);
-		renderer.render();
+		let result = renderer.render();
+		writer.write(result);
 
 		std::fs::remove_file(format!("./assets/{}", file_name)).expect("File could not be deleted");
 	}

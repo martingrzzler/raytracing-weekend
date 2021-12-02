@@ -3,8 +3,6 @@ use raytracing_weekend::{
 };
 
 fn main() {
-    let mut settings: Settings = Default::default();
-    settings.rendering.blur = DefocusBlur::OFF;
     let settings = Settings {
         rendering: RenderSettings {
             blur: DefocusBlur::OFF,
