@@ -8,8 +8,8 @@ use std::rc::Rc;
 mod entity;
 mod material;
 
+use crate::math::rand;
 use crate::math::Point3;
-use crate::math::{rand, Vec3};
 use crate::Color;
 
 pub struct Scene {
@@ -123,7 +123,10 @@ mod test {
 		scene.add_entity(near_sphere);
 
 		let intersection = scene.intersect(
-			&Ray::from(&Point3::new(), &norm(&Vec3::from(0.0, 0.0, -1.0))),
+			&Ray::from(
+				&Point3::new(),
+				&norm(&crate::math::Vec3::from(0.0, 0.0, -1.0)),
+			),
 			0.001,
 			100.0,
 		);
