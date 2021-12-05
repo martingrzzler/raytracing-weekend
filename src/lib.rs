@@ -1,7 +1,7 @@
 #![allow(non_upper_case_globals)]
 use camera::PlainGenerator;
 use camera::RayGenerator;
-use math::Vec3;
+pub use color::Color;
 pub use math::{Point3, Ray};
 pub use scene::Hit;
 pub use scene::Scene;
@@ -22,14 +22,13 @@ use camera::CameraParams;
 use crate::math::{norm, INFINITY};
 
 mod camera;
+mod color;
 mod math;
 mod pixel;
 mod scene;
 mod settings;
 mod utils;
 mod writer;
-
-pub type Color = Vec3;
 
 pub struct Renderer {
 	scene: Scene,
@@ -137,19 +136,16 @@ impl Renderer {
 
 	fn trace(&self, r: &Ray, depth: i32) -> Color {
 		if depth <= 0 {
-			return Color::new();
+			return Color::black();
 		}
-		let opt = self.scene.intersect(&r, 0.001, INFINITY);
-		if let Some(rec) = opt {
+		if let Some(rec) = self.scene.intersect(&r, 0.001, INFINITY) {
 			if let Some((attenuation, scattered)) = rec.material().scatter(r, rec) {
 				return attenuation * self.trace(&scattered, depth - 1);
 			}
-			return Color::new();
+			return Color::black();
 		}
-		let unit_dir = norm(r.direction());
-		let t = 0.5 * (unit_dir.y() + 1.0);
 
-		Color::from(1.0, 1.0, 1.0) * (1.0 - t) + Color::from(0.5, 0.7, 1.0) * t
+		Color::interpolate_by_direction(r)
 	}
 }
 
