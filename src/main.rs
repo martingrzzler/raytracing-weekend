@@ -4,13 +4,9 @@ use raytracing_weekend::{
 
 fn main() {
     let settings = Settings {
-        rendering: RenderSettings {
-            blur: DefocusBlur::OFF,
-            ..Default::default()
-        },
         image: ImageSettings {
-            width: 200,
-            height: 110,
+            width: 400,
+            height: 280,
         },
         ..Default::default()
     };
