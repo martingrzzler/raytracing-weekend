@@ -31,6 +31,10 @@ impl Scene {
 		rec
 	}
 
+	pub fn add_entity(&mut self, entity: Entity) {
+		self.entities.push(entity);
+	}
+
 	pub fn random() -> Scene {
 		let mut entities: Vec<Entity> = vec![];
 		let ground_mat = Lambertian::from(Color::from(0.5, 0.5, 0.5));
