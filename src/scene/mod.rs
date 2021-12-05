@@ -8,8 +8,8 @@ use std::rc::Rc;
 mod entity;
 mod material;
 
-use crate::math::rand;
 use crate::math::Point3;
+use crate::math::{rand, Vec3};
 use crate::Color;
 
 pub struct Scene {
@@ -17,6 +17,10 @@ pub struct Scene {
 }
 
 impl Scene {
+	pub fn new() -> Self {
+		Self { entities: vec![] }
+	}
+
 	pub fn intersect(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
 		let mut closest = t_max;
 		let mut rec: Option<HitRecord> = None;
@@ -91,5 +95,46 @@ impl Scene {
 		)));
 
 		Self { entities }
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use crate::math::norm;
+
+	use super::*;
+
+	#[test]
+	fn test_intersect() {
+		let mut scene = Scene::new();
+		let red_diffuse = Rc::new(Lambertian::from(Color::from(1.0, 0.0, 0.0)));
+
+		let far_away_sphere = Box::new(Sphere::from(
+			Point3::from(0.0, 0.0, -10.0),
+			1.0,
+			red_diffuse.clone(),
+		));
+		scene.add_entity(far_away_sphere);
+
+		let near_sphere = Box::new(Sphere::from(
+			Point3::from(0.0, 0.0, -5.0),
+			1.0,
+			red_diffuse.clone(),
+		));
+		scene.add_entity(near_sphere);
+
+		let intersection = scene.intersect(
+			&Ray::from(&Point3::new(), &norm(&Vec3::from(0.0, 0.0, -1.0))),
+			0.001,
+			100.0,
+		);
+
+		assert!(intersection.is_some());
+
+		if let Some(rec) = intersection {
+			assert_eq!(rec.t(), 4.0);
+		} else {
+			panic!("No intersection found");
+		}
 	}
 }
