@@ -13,7 +13,6 @@ pub fn radians(degrees: f64) -> f64 {
 	degrees * PI / 180.0
 }
 
-// distributed from 0 up to but not including 1
 pub fn rand() -> f64 {
 	let mut rng = rand::thread_rng();
 	let uniform_dst = Uniform::new_inclusive(0.0, 1.0);

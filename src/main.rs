@@ -1,5 +1,6 @@
 use raytracing_weekend::{
-    DefocusBlur, ImageSettings, PPMWriter, RenderSettings, Renderer, Scene, Settings, WriteResult,
+    Antialiasing, DefocusBlur, ImageSettings, PPMWriter, RenderSettings, Renderer, Scene, Settings,
+    WriteResult,
 };
 
 fn main() {
@@ -7,6 +8,10 @@ fn main() {
         image: ImageSettings {
             width: 400,
             height: 280,
+        },
+        rendering: RenderSettings {
+            antialiasing: Antialiasing::NONE,
+            ..Default::default()
         },
         ..Default::default()
     };

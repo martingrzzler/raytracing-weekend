@@ -19,7 +19,7 @@ use crate::utils::ProgressBar;
 use crate::{camera::Camera, math::rand};
 use camera::CameraParams;
 
-use crate::math::{norm, INFINITY};
+use crate::math::INFINITY;
 
 mod camera;
 mod color;
@@ -83,33 +83,30 @@ impl Renderer {
 	fn pixel_color(&self, curr_width: i32, curr_height: i32) -> Color {
 		match self.settings.antialiasing() {
 			Antialiasing::MSAA { samples_per_pixel } => {
-				let color: Color = (0..*samples_per_pixel)
-					.map(|_sample| {
-						let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &rand);
-						let r = self.ray_generator.gen_ray(s, t);
-						self.trace(&r, self.settings.max_depth())
-					})
-					.sum();
-
-				color / *samples_per_pixel as f64
+				self.get_average_color(*samples_per_pixel, curr_width, curr_height)
 			}
-			Antialiasing::NONE => {
-				let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height, &|| 0.5);
-				let r = self.ray_generator.gen_ray(s, t);
-				self.trace(&r, self.settings.max_depth())
-			}
+			Antialiasing::NONE => self.get_color(curr_width, curr_height),
 		}
 	}
 
-	fn calc_viewport_coordinates(
-		&self,
-		curr_width: i32,
-		curr_height: i32,
-		deviation: &dyn Fn() -> f64,
-	) -> (f64, f64) {
-		let s: f64 = (curr_width as f64 + deviation()) / ((self.settings.width() as f64) - 1.0);
-		let t: f64 = (curr_height as f64 + deviation()) / ((self.settings.height() as f64) - 1.0);
+	fn calc_viewport_coordinates(&self, curr_width: i32, curr_height: i32) -> (f64, f64) {
+		let s: f64 = (curr_width as f64 + rand()) / ((self.settings.width() as f64) - 1.0);
+		let t: f64 = (curr_height as f64 + rand()) / ((self.settings.height() as f64) - 1.0);
 		(s, t)
+	}
+
+	fn get_color(&self, curr_width: i32, curr_height: i32) -> Color {
+		let (s, t) = self.calc_viewport_coordinates(curr_width, curr_height);
+		let r = self.ray_generator.gen_ray(s, t);
+		self.trace(&r, self.settings.max_depth())
+	}
+
+	fn get_average_color(&self, sample_size: i32, curr_width: i32, curr_height: i32) -> Color {
+		let color: Color = (0..sample_size)
+			.map(|_sample| self.get_color(curr_width, curr_height))
+			.sum();
+
+		color / sample_size as f64
 	}
 
 	fn get_ray_generator(settings: &Settings) -> Box<dyn RayGenerator> {
@@ -195,10 +192,13 @@ mod test {
 
 		let renderer = Renderer::from(scene, settings);
 
-		let s_t = renderer.calc_viewport_coordinates(0, 0, &|| 0.0);
-		assert_eq!(s_t, (0.0, 0.0));
+		let (s, t) = renderer.calc_viewport_coordinates(0, 0);
+		println!("s={} t={}", s, t);
+		assert!(s < 0.1);
+		assert!(t < 0.1);
 
-		let s_t = renderer.calc_viewport_coordinates(width - 1, height - 1, &|| 0.0);
-		assert_eq!(s_t, (1.0, 1.0));
+		let (s, t) = renderer.calc_viewport_coordinates(width - 1, height - 1);
+		assert!(s > 0.99);
+		assert!(t > 0.99);
 	}
 }
