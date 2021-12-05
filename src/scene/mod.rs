@@ -23,16 +23,15 @@ impl Scene {
 
 	pub fn intersect(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
 		let mut closest = t_max;
-		let mut rec: Option<HitRecord> = None;
+		let mut result: Option<HitRecord> = None;
 		for e in self.entities.iter() {
-			let opt = e.hit(&r, t_min, closest);
-			if let Some(tmp) = opt {
-				closest = tmp.t();
-				rec = Some(tmp);
+			if let Some(rec) = e.hit(&r, t_min, closest) {
+				closest = rec.t();
+				result = Some(rec);
 			}
 		}
 
-		rec
+		result
 	}
 
 	pub fn add_entity(&mut self, entity: Entity) {
