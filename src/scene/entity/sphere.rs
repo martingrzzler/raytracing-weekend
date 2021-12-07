@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 
-use crate::math::{dot, Point3, Ray};
+use crate::math::{dot, Point3, Ray, Vec3};
 use crate::scene::{Hit, HitRecord, Lambertian, Material};
 
 pub struct Sphere {
@@ -50,6 +50,10 @@ impl Sphere {
 
 		Some(root)
 	}
+
+	fn outward_normal(&self, hit_p: &Point3) -> Vec3 {
+		(hit_p - &self.center) / self.radius
+	}
 }
 
 impl Hit for Sphere {
@@ -58,8 +62,7 @@ impl Hit for Sphere {
 			let mut rec = HitRecord::new(Rc::clone(&self.mat));
 			*rec.t_mut() = root;
 			*rec.point_mut() = r.at(rec.t());
-			let outward_normal = (rec.point() - &self.center) / self.radius;
-			rec.calc_normal(&r, outward_normal);
+			rec.calc_normal(&r, self.outward_normal(rec.point()));
 			Some(rec)
 		} else {
 			None
@@ -97,13 +100,14 @@ mod test {
 		assert!(hit.is_none());
 	}
 
+	#[test]
 	fn test_outward_normal() {
 		let r = Ray::from(&Point3::new(), &norm(&Vec3::from(0.0, 0.0, -1.0)));
 		let mat = Lambertian::new();
 		let sphere = Sphere::from(Point3::from(0.0, 0.0, -1.0), 0.5, Rc::new(mat));
 
-		let outward_normal = sphere.outward_normal(Point3::from(0.0, 0.0, -0.5));
+		let outward_normal = sphere.outward_normal(&Point3::from(0.0, 0.0, -0.5));
 
-		assert_eq!(Vec3::from(0.0, 0.0, 0.25), outward_normal)
+		assert_eq!(Vec3::from(0.0, 0.0, 1.0), outward_normal)
 	}
 }
