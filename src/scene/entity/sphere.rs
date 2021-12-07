@@ -102,7 +102,6 @@ mod test {
 
 	#[test]
 	fn test_outward_normal() {
-		let r = Ray::from(&Point3::new(), &norm(&Vec3::from(0.0, 0.0, -1.0)));
 		let mat = Lambertian::new();
 		let sphere = Sphere::from(Point3::from(0.0, 0.0, -1.0), 0.5, Rc::new(mat));
 
