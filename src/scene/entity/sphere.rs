@@ -27,10 +27,8 @@ impl Sphere {
 			mat,
 		}
 	}
-}
 
-impl Hit for Sphere {
-	fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+	fn solve_quadratic(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<f64> {
 		let oc = r.origin() - &self.center;
 		let a = r.direction().len_squared();
 		let half_b = dot(&oc, &r.direction());
@@ -49,12 +47,23 @@ impl Hit for Sphere {
 				return None;
 			}
 		}
-		let mut rec = HitRecord::new(Rc::clone(&self.mat));
-		*rec.t_mut() = root;
-		*rec.point_mut() = r.at(rec.t());
-		let outward_normal = (rec.point() - &self.center) / self.radius;
-		rec.calc_normal(&r, outward_normal);
-		Some(rec)
+
+		Some(root)
+	}
+}
+
+impl Hit for Sphere {
+	fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+		if let Some(root) = self.solve_quadratic(r, t_min, t_max) {
+			let mut rec = HitRecord::new(Rc::clone(&self.mat));
+			*rec.t_mut() = root;
+			*rec.point_mut() = r.at(rec.t());
+			let outward_normal = (rec.point() - &self.center) / self.radius;
+			rec.calc_normal(&r, outward_normal);
+			Some(rec)
+		} else {
+			None
+		}
 	}
 }
 
