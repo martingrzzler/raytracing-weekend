@@ -140,7 +140,3 @@ impl RayGenerator for PlainGenerator {
 pub trait RayGenerator {
 	fn gen_ray(&self, s: f64, t: f64) -> Ray;
 }
-
-// 	// key here to understand is that rays are created within the lens_radius but because the offset is subtracted
-// 	// from the ray direction, the ray hits always the same point on the plane focus_distance away.
-// 	// Objects being hit by the ray before or after the plane will appear blurred consequently.

@@ -193,7 +193,6 @@ mod test {
 		let renderer = Renderer::from(scene, settings);
 
 		let (s, t) = renderer.calc_viewport_coordinates(0, 0);
-		println!("s={} t={}", s, t);
 		assert!(s < 0.1);
 		assert!(t < 0.1);
 
